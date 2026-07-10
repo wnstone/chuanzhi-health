@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.dao.OrderSettingDao">
+    <!--查询当前日期是否进行了预约设置-->
+    <select id="findCountByOrderDate" parameterType="java.util.Date" resultType="java.lang.Long">
+        SELECT count(*) FROM t_ordersetting WHERE orderDate = #{orderDate}
+    </select>
+
+    <!--进行过预约设置，执行更新操作-->
+    <update id="editNumberByOrderDate" parameterType="com.itheima.pojo.OrderSetting">
+        UPDATE t_ordersetting SET number = #{number}
+ 			WHERE orderDate = #{orderDate}
+    </update>
+
+    <!--没有进行过预约设置，执行新增操作-->
+    <insert id="add" parameterType="com.itheima.pojo.OrderSetting">
+        INSERT INTO t_ordersetting(number,orderDate)
+          VALUES (#{number},#{orderDate})
+    </insert>
+
+    <!--根据年月查询对应的预约设置信息-->
+    <select id="getOrderSettingByMonth" parameterType="map" resultType="com.itheima.pojo.OrderSetting">
+        SELECT * FROM t_ordersetting WHERE orderDate BETWEEN #{begin} AND #{end}
+    </select>
+
+    <!--根据日期查询预约设置信息-->
+    <select id="findByOrderDate" parameterType="date" resultType="com.itheima.pojo.OrderSetting">
+        SELECT * FROM t_ordersetting WHERE orderDate = #{orderDate}
+    </select>
+
+    <!--更新已预约人数-->
+    <update id="editReservationsByOrderDate" parameterType="com.itheima.pojo.OrderSetting">
+        UPDATE t_ordersetting SET reservations = #{reservations}
+        WHERE orderDate = #{orderDate}
+    </update>
+
+    <!--查询指定日期的已预约人数-->
+    <select id="findByReservations" resultType="java.lang.Integer">
+        SELECT reservations FROM t_ordersetting WHERE orderDate = #{orderDate}
+    </select>
+</mapper>

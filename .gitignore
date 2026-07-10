@@ -1,0 +1,13 @@
+# 已解压过的原始下载包,内容跟解压后的文件夹重复,不用再进仓库
+# (源代码.zip 149M 超过 GitHub 单文件 100M 上限,必须排除)
+/源代码.zip
+/数据库代码.zip
+/_环境_/jdk8.zip
+/_环境_/maven.zip
+
+# Java 编译产物,重新 mvn compile 就有,不用带着走
+**/target/
+
+# ZooKeeper 运行时自己写的事务日志/快照,纯垃圾数据,不该进仓库
+_环境_/apache-zookeeper-3.6.3-bin/logs/
+_环境_/apache-zookeeper-3.6.3-bin/data/

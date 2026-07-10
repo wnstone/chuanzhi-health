@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.dao.SetmealDao">
+    <resultMap id="baseResultMap" type="com.itheima.pojo.Setmeal">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="helpCode" property="helpCode"/>
+        <result column="sex" property="sex"/>
+        <result column="age" property="age"/>
+        <result column="price" property="price"/>
+        <result column="remark" property="remark"/>
+        <result column="attention" property="attention"/>
+        <result column="img" property="img"/>
+    </resultMap>
+    <!--配置多对多映射关系-->
+    <resultMap id="findByIdResultMap" extends="baseResultMap"
+               type="com.itheima.pojo.Setmeal">
+        <!--column用于指定将哪个字段的值传递给第二条sql-->
+        <collection property="checkGroups"
+                    ofType="com.itheima.pojo.CheckGroup"
+                    column="id"
+                    select="com.itheima.dao.CheckGroupDao.selectCheckGroupsBySetmealId"></collection>
+    </resultMap>
+    <!--新增套餐-->
+    <insert id="add" parameterType="com.itheima.pojo.Setmeal">
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO t_setmeal
+        (code,name,sex,age,helpCode,price,remark,attention,img)
+        VALUES
+        (#{code},#{name},#{sex},#{age},#{helpCode},
+        #{price},#{remark},#{attention},#{img})
+    </insert>
+
+    <!--设置套餐和检查组多对多关系，操作的是中间关系表-->
+    <insert id="setSetmealAndCheckGroup" parameterType="map">
+        INSERT INTO t_setmeal_checkgroup(setmeal_id,checkgroup_id)
+        VALUES (#{setmealId},#{checkgroupId})
+    </insert>
+
+    <!--根据条件查询、分页查询套餐-->
+    <select id="findByCondition" parameterType="string" resultType="com.itheima.pojo.Setmeal">
+        SELECT * FROM t_setmeal
+        <if test="value != null and value.length > 0">
+            WHERE code = #{value} OR name LIKE '%${value}%'
+            OR helpCode = #{value}
+        </if>
+    </select>
+
+    <!--根据id查询套餐-->
+    <select id="findById" parameterType="int" resultType="com.itheima.pojo.Setmeal">
+        SELECT * FROM t_setmeal WHERE id = #{id}
+    </select>
+
+    <!--根据套餐id查询与之关联的检查组id-->
+    <select id="findCheckGroupIdsBySetmealId" parameterType="int" resultType="int">
+         SELECT checkgroup_id FROM t_setmeal_checkgroup WHERE setmeal_id = #{setmeal_id}
+    </select>
+
+    <!--编辑套餐基本信息-->
+    <update id="edit" parameterType="com.itheima.pojo.Setmeal">
+        UPDATE t_setmeal
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="code != null">
+                code = #{code},
+            </if>
+            <if test="helpCode != null">
+                helpCode = #{helpCode},
+            </if>
+            <if test="sex != null">
+                sex = #{sex},
+            </if>
+            <if test="age != null">
+                age = #{age},
+            </if>
+            <if test="price != null">
+                price = #{price},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+            <if test="attention != null">
+                attention = #{attention},
+            </if>
+            <if test="img != null">
+                img = #{img},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!--清理套餐和检查组的关联关系-->
+    <delete id="deleteAssociation" parameterType="int">
+        DELETE FROM t_setmeal_checkgroup WHERE setmeal_id = #{setmeal_id}
+    </delete>
+
+    <!--根据id删除套餐-->
+    <delete id="deleteById" parameterType="int">
+        DELETE FROM t_setmeal WHERE id = #{id}
+    </delete>
+
+    <!--获取所有套餐信息-->
+    <select id="findAll" resultType="com.itheima.pojo.Setmeal">
+        SELECT * FROM t_setmeal
+    </select>
+
+    <!--根据套餐id查询套餐详情（包含基本信息、关联的检查组、检查项信息）-->
+    <select id="findById4Detail" parameterType="int"
+            resultMap="findByIdResultMap">
+        SELECT * FROM t_setmeal WHERE id = #{id}
+    </select>
+
+    <!--查询套餐预约占比数据-->
+    <select id="getSetmealReport" resultType="map">
+      SELECT s.name,count(o.setmeal_id) AS value FROM t_order o,t_setmeal s
+        WHERE o.setmeal_id = s.id
+        GROUP BY s.name
+    </select>
+</mapper>
