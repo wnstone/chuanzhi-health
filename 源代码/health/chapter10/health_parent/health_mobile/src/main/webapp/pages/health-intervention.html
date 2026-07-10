@@ -1176,7 +1176,7 @@ function tween(id, to, dur, onUpdate){
   var obj = { cur: from, raf: null };
   tweens.set(id, obj);
   function frame(now){
-    var t = Math.min(1, (now - start) / dur);
+    var t = Math.max(0, Math.min(1, (now - start) / dur));
     obj.cur = from + (to - from) * easeOutCubic(t);
     onUpdate(obj.cur);
     if (t < 1) obj.raf = requestAnimationFrame(frame);
