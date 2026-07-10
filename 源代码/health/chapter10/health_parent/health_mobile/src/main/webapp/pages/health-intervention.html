@@ -1495,7 +1495,489 @@ function renderDirty(views){
 function renderAll(){
   renderDirty(['overview', 'plans', 'checkin', 'mine', 'detail']);
 }
-<!--__JS3__-->
+/* ================= 13. 唯一变更管道 ================= */
+function mutate(fn, dirtyViews, badgeCtx){
+  fn(state);
+  save();
+  renderDirty(dirtyViews || []);
+  // 徽章判定延后触发,让操作本身的 Toast 先出、成就金 Toast 随后顶上
+  setTimeout(function(){ checkBadges(badgeCtx || {}); }, 650);
+}
+
+/* ================= 14. 徽章判定 ================= */
+function checkBadges(ctx){
+  var t = todayKey();
+  var streakNow = getStreak().days;
+  var totalDone = getTotalDone();
+  var tests = {
+    first_checkin: state.punchLog.length > 0,
+    streak7:  streakNow >= 7 || getMaxStreak() >= 7,
+    streak21: streakNow >= 21 || getMaxStreak() >= 21,
+    task50:   totalDone >= 50,
+    task100:  totalDone >= 100,
+    designer: state.plans.some(function(p){ return p.custom; }),
+    perfect_day: getDayRate(t) >= 1,
+    early_bird: !!ctx.earlyBird
+  };
+  var newly = [];
+  BADGE_DEFS.forEach(function(b){
+    if (!state.badges[b.id] && tests[b.id]){
+      state.badges[b.id] = t;
+      newly.push(b);
+    }
+  });
+  if (newly.length){
+    save();
+    renderDirty(['mine']);
+    newly.forEach(function(b, i){
+      setTimeout(function(){
+        toast('🏆 解锁成就:' + b.name, 'gold');
+      }, i * 1900);
+    });
+  }
+}
+
+/* ================= 15. Toast(单例覆盖式) ================= */
+var toastTimer = null;
+function toast(msg, type){
+  var el = $('toast');
+  el.classList.remove('gold');
+  var icon = '';
+  if (type === 'check') icon = '<span class="tk">✓</span>';
+  else if (type === 'gold') el.classList.add('gold');
+  else if (type === 'info') icon = '<span>ℹ️</span>';
+  el.innerHTML = icon + '<span>' + esc(msg) + '</span>';
+  el.classList.remove('show');
+  void el.offsetWidth;              // 重排,保证重复触发也有进场动画
+  el.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){
+    el.classList.remove('show');
+    toastTimer = null;
+  }, type === 'gold' ? 2200 : 1700);
+}
+
+/* ================= 16. 打卡粒子 ================= */
+function burstParticles(cx, cy){
+  var colors = ['#ff8a00', '#ff6a00', '#21c17a', '#ffb340'];
+  for (var i = 0; i < 12; i++){
+    var ang = (i / 12) * Math.PI * 2;
+    var dist = 58 + (i % 3) * 16;
+    var p = document.createElement('span');
+    p.className = 'pt';
+    p.style.left = (cx - 4) + 'px';
+    p.style.top = (cy - 4) + 'px';
+    p.style.background = colors[i % colors.length];
+    p.style.setProperty('--dx', Math.cos(ang) * dist + 'px');
+    p.style.setProperty('--dy', Math.sin(ang) * dist + 'px');
+    document.body.appendChild(p);
+    setTimeout(function(el){ return function(){ el.remove(); }; }(p), 700);
+  }
+}
+
+/* ================= 17. Tab 导航(方向感知转场) ================= */
+function switchTab(target){
+  if (target === ui.view || ui.isAnimating) return;
+  var fromIdx = TAB_ORDER.indexOf(ui.view);
+  var toIdx = TAB_ORDER.indexOf(target);
+  var forward = toIdx > fromIdx;
+  var oldView = $('view-' + ui.view);
+  var newView = $('view-' + target);
+  ui.isAnimating = true;
+  ui.view = target;
+  $('topTitle').textContent = TAB_TITLE[target];
+  // Tab 高亮 + 图标 pop
+  document.querySelectorAll('.tab-item').forEach(function(el){
+    var on = el.getAttribute('data-tab') === target;
+    el.classList.toggle('active', on);
+    el.classList.toggle('pop', on);
+    if (on) setTimeout(function(){ el.classList.remove('pop'); }, 320);
+  });
+  $('fab').classList.toggle('hidden', target !== 'plans');
+  newView.classList.add('active', forward ? 'anim-in-right' : 'anim-in-left');
+  oldView.classList.add(forward ? 'anim-out-left' : 'anim-out-right');
+  var done = false;
+  function finish(){
+    if (done) return;
+    done = true;
+    oldView.classList.remove('active', 'anim-out-left', 'anim-out-right');
+    newView.classList.remove('anim-in-right', 'anim-in-left');
+    ui.isAnimating = false;
+  }
+  newView.addEventListener('animationend', finish, { once:true });
+  setTimeout(finish, 420);          // 兜底解锁,快速连点不穿帮
+  if (target === 'plans') requestAnimationFrame(movePill);
+}
+
+/* ================= 18. 方案详情 push / pop(+物理返回键) ================= */
+function openDetail(pid){
+  var p = getPlan(pid);
+  if (!p || ui.detailOpen) return;
+  ui.detailPlanId = pid;
+  ui.detailOpen = true;
+  tweens.delete('dRing');           // 每次进详情,环从0爬升
+  renderDetail();
+  $('detail').scrollTop = 0;
+  $('detail').classList.add('open');
+  $('stage').classList.add('pushed');
+  $('dim').classList.add('on');
+  try{ history.pushState({ v:'detail' }, ''); }catch(e){}
+}
+function hideDetail(){
+  if (!ui.detailOpen) return;
+  ui.detailOpen = false;
+  ui.detailPlanId = null;
+  $('detail').classList.remove('open');
+  $('stage').classList.remove('pushed');
+  $('dim').classList.remove('on');
+}
+window.addEventListener('popstate', function(){
+  if (ui.detailOpen) hideDetail();
+});
+
+/* ================= 19. 任务勾选(概览/详情同源) ================= */
+function toggleTask(pid, tid){
+  var p = getPlan(pid);
+  if (!p) return;
+  var t = todayKey();
+  var key = pid + ':' + tid;
+  var wasChecked = isChecked(pid, tid, t);
+  var early = !wasChecked && new Date().getHours() < 9;
+  mutate(function(s){
+    if (!s.checkLog[t]) s.checkLog[t] = {};
+    if (wasChecked) delete s.checkLog[t][key];
+    else s.checkLog[t][key] = true;
+  }, ['overview', 'plans', 'detail'], { earlyBird: early });
+  if (wasChecked){
+    toast('已取消勾选', 'info');
+    return;
+  }
+  var task = null;
+  p.tasks.forEach(function(tk){ if (tk.id === tid) task = tk; });
+  if (getDayRate(t) >= 1) toast('今日全部完成!🎉', 'check');
+  else if (ui.detailOpen && getPlanRate(pid) >= 1) toast('今日方案全部完成 🎉', 'check');
+  else toast('已完成:' + (task ? task.text : ''), 'check');
+}
+
+/* ================= 20. 打卡 ================= */
+function doPunch(){
+  var t = todayKey();
+  if (isPunched(t)) return;
+  var btn = $('punchBtn');
+  var rect = btn.getBoundingClientRect();
+  burstParticles(rect.left + rect.width / 2, rect.top + rect.height / 2);
+  btn.classList.add('boom');
+  setTimeout(function(){ btn.classList.remove('boom'); }, 520);
+  mutate(function(s){
+    s.punchLog.push(t);
+    s.punchLog.sort();
+    s.punchTimes[t] = nowHM();
+  }, ['overview', 'checkin', 'mine']);
+  renderCalendar(true);             // 今日格子点亮动画
+  var days = getStreak().days;
+  if (days === 7 || days === 21 || days === 60){
+    toast('🎖️ 连续打卡 ' + days + ' 天,里程碑达成!', 'gold');
+  }else{
+    toast('打卡成功,连续 ' + days + ' 天!', 'check');
+  }
+}
+
+/* ================= 21. 新增方案抽屉 ================= */
+var sheetForm = { cat:'diet', emoji:'🥗' };
+function openSheet(){
+  ui.sheetOpen = true;
+  resetSheetForm();
+  $('sheetMask').classList.add('on');
+  $('sheet').classList.add('open');
+  document.body.classList.add('lock');
+}
+function closeSheet(){
+  ui.sheetOpen = false;
+  $('sheetMask').classList.remove('on');
+  $('sheet').classList.remove('open');
+  document.body.classList.remove('lock');
+}
+function resetSheetForm(){
+  sheetForm = { cat:'diet', emoji:'🥗' };
+  $('fName').value = '';
+  $('fDesc').value = '';
+  $('fNameCount').textContent = '0/12';
+  document.querySelectorAll('#catPills .cat-pill').forEach(function(el, i){
+    el.classList.toggle('on', i === 0);
+  });
+  renderEmojiGrid();
+  $('taskRows').innerHTML = '';
+  addTaskRow();
+}
+function renderEmojiGrid(){
+  var html = '';
+  EMOJIS.forEach(function(e){
+    html += '<button class="emoji-cell' + (e === sheetForm.emoji ? ' on' : '') +
+      '" data-emoji="' + e + '">' + e + '</button>';
+  });
+  $('emojiGrid').innerHTML = html;
+}
+function addTaskRow(val){
+  var row = document.createElement('div');
+  row.className = 't-input-row';
+  row.innerHTML =
+    '<input class="f-input" type="text" maxlength="30" placeholder="例如:每天喝够8杯水" value="' + esc(val || '') + '">' +
+    '<button class="t-del" data-delrow="1">×</button>';
+  $('taskRows').appendChild(row);
+}
+function shake(el){
+  el.classList.remove('err');
+  void el.offsetWidth;
+  el.classList.add('err');
+  setTimeout(function(){ el.classList.remove('err'); }, 600);
+}
+function savePlanForm(){
+  var name = $('fName').value.trim();
+  if (!name){
+    shake($('fName'));
+    toast('请填写方案名称', 'info');
+    return;
+  }
+  var taskTexts = [];
+  var inputs = $('taskRows').querySelectorAll('input');
+  var firstEmpty = null;
+  inputs.forEach(function(inp){
+    var v = inp.value.trim();
+    if (v) taskTexts.push(v);
+    else if (!firstEmpty) firstEmpty = inp;
+  });
+  if (!taskTexts.length){
+    shake(firstEmpty || $('taskRows'));
+    toast('至少填写 1 条每日任务', 'info');
+    return;
+  }
+  var plan;
+  mutate(function(s){
+    var id = 'p' + (++s.seq);
+    plan = {
+      id: id,
+      name: name,
+      category: sheetForm.cat,
+      desc: $('fDesc').value.trim(),
+      img: '',
+      icon: sheetForm.emoji,
+      createdAt: todayKey(),
+      custom: true,
+      tasks: taskTexts.map(function(txt, i){ return { id:'t' + (i + 1), text: txt }; })
+    };
+    s.plans.unshift(plan);
+  }, ['overview', 'mine']);
+  ui.newPlanId = plan.id;
+  ui.filter = { category:'all', keyword:'' };
+  $('searchInput').value = '';
+  $('searchClear').classList.add('hidden');
+  document.querySelectorAll('#chipRow .chip').forEach(function(el){
+    el.classList.toggle('active', el.getAttribute('data-cat') === 'all');
+  });
+  renderPlans();
+  closeSheet();
+  if (ui.view !== 'plans') switchTab('plans');
+  toast('方案已创建:' + name, 'check');
+}
+
+/* ================= 22. 确认弹层 ================= */
+var modalCb = null;
+function confirmBox(title, text, danger, cb){
+  $('modalTitle').textContent = title;
+  $('modalText').textContent = text;
+  $('modalOk').classList.toggle('danger', !!danger);
+  modalCb = cb;
+  $('modalMask').classList.add('on');
+}
+function closeModal(){
+  $('modalMask').classList.remove('on');
+  modalCb = null;
+}
+
+/* ================= 23. 删除方案 / 恢复演示数据 ================= */
+function deletePlan(pid){
+  var p = getPlan(pid);
+  if (!p || !p.custom) return;
+  confirmBox('删除方案', '确定删除「' + p.name + '」吗?该方案的勾选记录会一并清除,此操作不可恢复。', true, function(){
+    mutate(function(s){
+      s.plans = s.plans.filter(function(x){ return x.id !== pid; });
+      var prefix = pid + ':';
+      Object.keys(s.checkLog).forEach(function(day){
+        Object.keys(s.checkLog[day]).forEach(function(k){
+          if (k.indexOf(prefix) === 0) delete s.checkLog[day][k];
+        });
+      });
+    }, ['overview', 'plans', 'mine']);
+    if (ui.detailOpen) history.back();
+    toast('方案已删除', 'info');
+  });
+}
+function restoreDemo(){
+  confirmBox('恢复演示数据', '将清空当前全部记录,并恢复为初始演示数据,确定继续吗?', false, function(){
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+    tweens.forEach(function(rec){ if (rec.raf) cancelAnimationFrame(rec.raf); });
+    tweens.clear();
+    ui.heatLv = [];
+    state = seedState();
+    save();
+    renderAll();
+    toast('演示数据已恢复', 'check');
+  });
+}
+
+/* ================= 24. 事件绑定(容器级委托,重绘不丢监听) ================= */
+function bindEvents(){
+  // 顶栏返回首页
+  $('btnHome').addEventListener('click', function(){ location.href = 'index.html'; });
+  // 底部 Tab
+  $('tabbar').addEventListener('click', function(e){
+    var item = e.target.closest('.tab-item');
+    if (item) switchTab(item.getAttribute('data-tab'));
+  });
+  // 全局点击委托:任务勾选 / 打开详情 / 快捷跳转 / 空状态新建
+  document.body.addEventListener('click', function(e){
+    var t = e.target;
+    var toggle = t.closest('[data-toggle]');
+    if (toggle){
+      toggleTask(toggle.getAttribute('data-pid'), toggle.getAttribute('data-tid'));
+      return;
+    }
+    var open = t.closest('[data-open]');
+    if (open){
+      var pid = open.getAttribute('data-open');
+      open.classList.add('pressing');
+      setTimeout(function(){ open.classList.remove('pressing'); }, 120);
+      setTimeout(function(){ openDetail(pid); }, 120);   // 先按压回弹再滑入
+      return;
+    }
+    var goto_ = t.closest('[data-goto]');
+    if (goto_){ switchTab(goto_.getAttribute('data-goto')); return; }
+    if (t.closest('[data-newplan]')){ openSheet(); return; }
+  });
+  // 方案页:搜索(150ms 防抖)+ 清空 + 分类 chips
+  var searchTimer = null;
+  $('searchInput').addEventListener('input', function(){
+    var v = this.value;
+    $('searchClear').classList.toggle('hidden', !v);
+    if (searchTimer) clearTimeout(searchTimer);
+    searchTimer = setTimeout(function(){
+      ui.filter.keyword = v;
+      renderPlans();
+      if (v.trim() && !filterPlans().length) toast('没有找到相关方案', 'info');
+    }, 150);
+  });
+  $('searchClear').addEventListener('click', function(){
+    $('searchInput').value = '';
+    this.classList.add('hidden');
+    ui.filter.keyword = '';
+    renderPlans();
+  });
+  $('chipRow').addEventListener('click', function(e){
+    var chip = e.target.closest('.chip');
+    if (!chip) return;
+    document.querySelectorAll('#chipRow .chip').forEach(function(el){
+      el.classList.toggle('active', el === chip);
+    });
+    ui.filter.category = chip.getAttribute('data-cat');
+    movePill();
+    renderPlans();
+  });
+  // 详情:返回(与物理返回键走同一段 popstate 逻辑)+ 删除
+  $('detailBack').addEventListener('click', function(){ history.back(); });
+  $('detailDelete').addEventListener('click', function(){ deletePlan(ui.detailPlanId); });
+  // 打卡
+  $('punchBtn').addEventListener('click', doPunch);
+  // FAB + 抽屉
+  $('fab').addEventListener('click', openSheet);
+  $('sheetMask').addEventListener('click', closeSheet);
+  $('sheetClose').addEventListener('click', closeSheet);
+  $('saveBtn').addEventListener('click', savePlanForm);
+  $('addTaskBtn').addEventListener('click', function(){
+    if ($('taskRows').children.length >= 8){
+      toast('每个方案最多 8 条任务', 'info');
+      return;
+    }
+    addTaskRow();
+    var last = $('taskRows').lastElementChild.querySelector('input');
+    if (last) last.focus();
+  });
+  $('taskRows').addEventListener('click', function(e){
+    if (!e.target.closest('[data-delrow]')) return;
+    if ($('taskRows').children.length <= 1){
+      toast('至少保留 1 条任务', 'info');
+      return;
+    }
+    e.target.closest('.t-input-row').remove();
+  });
+  $('fName').addEventListener('input', function(){
+    $('fNameCount').textContent = this.value.length + '/12';
+  });
+  $('catPills').addEventListener('click', function(e){
+    var pill = e.target.closest('.cat-pill');
+    if (!pill) return;
+    sheetForm.cat = pill.getAttribute('data-cat');
+    document.querySelectorAll('#catPills .cat-pill').forEach(function(el){
+      el.classList.toggle('on', el === pill);
+    });
+  });
+  $('emojiGrid').addEventListener('click', function(e){
+    var cell = e.target.closest('.emoji-cell');
+    if (!cell) return;
+    sheetForm.emoji = cell.getAttribute('data-emoji');
+    renderEmojiGrid();
+  });
+  // 确认弹层
+  $('modalCancel').addEventListener('click', closeModal);
+  $('modalOk').addEventListener('click', function(){
+    var cb = modalCb;
+    closeModal();
+    if (cb) cb();
+  });
+  $('modalMask').addEventListener('click', function(e){
+    if (e.target === this) closeModal();
+  });
+  // 移动端按压兜底(:active 在部分移动浏览器不可靠)
+  document.body.addEventListener('touchstart', function(e){
+    var el = e.target.closest('.pressable');
+    if (el) el.classList.add('pressing');
+  }, { passive:true });
+  document.body.addEventListener('touchend', function(){
+    document.querySelectorAll('.pressing').forEach(function(el){
+      el.classList.remove('pressing');
+    });
+  }, { passive:true });
+  // 跨天自动翻篇:挂后台过夜再回来,不显示旧状态
+  document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState === 'visible') checkDayChange();
+  });
+  window.addEventListener('focus', checkDayChange);
+  window.addEventListener('resize', movePill);
+}
+function checkDayChange(){
+  var t = todayKey();
+  if (ui.lastDay && ui.lastDay !== t){
+    ui.lastDay = t;
+    ui.heatLv = [];
+    renderAll();
+    toast('新的一天开始了,今日任务已刷新', 'info');
+  }else{
+    ui.lastDay = t;
+  }
+}
+
+/* ================= 25. 启动 ================= */
+function init(){
+  load();
+  ui.lastDay = todayKey();
+  // 环初始描边(从0开始,首屏爬升);趋势末点初始压在底线,首屏"顶上去"
+  setRing($('bigRingFg'), 70, 0);
+  setRing($('dRingFg'), 36, 0);
+  tweens.set('trendY', { cur: 54, raf: null });
+  bindEvents();
+  renderAll();
+  $('topTitle').textContent = TAB_TITLE[ui.view];
+}
+init();
 </script>
 </body>
 </html>
