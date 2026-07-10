@@ -1647,7 +1647,7 @@ function toggleTask(pid, tid){
     if (!s.checkLog[t]) s.checkLog[t] = {};
     if (wasChecked) delete s.checkLog[t][key];
     else s.checkLog[t][key] = true;
-  }, ['overview', 'plans', 'detail'], { earlyBird: early });
+  }, ['overview', 'plans', 'detail', 'mine'], { earlyBird: early });
   if (wasChecked){
     toast('已取消勾选', 'info');
     return;
@@ -1887,6 +1887,8 @@ function bindEvents(){
   $('detailDelete').addEventListener('click', function(){ deletePlan(ui.detailPlanId); });
   // 打卡
   $('punchBtn').addEventListener('click', doPunch);
+  // 我的:恢复演示数据
+  $('restoreBtn').addEventListener('click', restoreDemo);
   // FAB + 抽屉
   $('fab').addEventListener('click', openSheet);
   $('sheetMask').addEventListener('click', closeSheet);
