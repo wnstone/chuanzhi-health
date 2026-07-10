@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>健康档案 - 传智健康</title>
+    <link rel="icon" href="../img/asset-favico.ico">
+    <style>
+        :root{
+            --brand:#ff8a00; --brand-2:#ff6a00; --brand-soft:#fff4e6;
+            --ink:#2b2b33; --sub:#9a9aa5; --bg:#f3f2f7; --card:#fff;
+            --radius:16px; --shadow:0 6px 20px rgba(0,0,0,.06);
+        }
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        html,body{background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang SC","Microsoft YaHei",Helvetica,sans-serif;line-height:1.6}
+        ul,li{list-style:none}
+        .app{max-width:750px;margin:0 auto;min-height:100vh;overflow:hidden}
+        .top-header{background:#1d1d22;color:#fff;height:45px;line-height:45px;display:flex;align-items:center;padding:0 14px;position:sticky;top:0;z-index:20}
+        .top-header .back{font-size:22px;cursor:pointer;width:30px}
+        .top-header .title{flex:1;text-align:center;font-size:16px}
+        .top-header .more{width:30px;text-align:right;letter-spacing:2px;font-size:18px}
+        .hero{position:relative;background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 100%);color:#fff;padding:24px 20px 56px;overflow:hidden}
+        .hero .blob{position:absolute;border-radius:50%;background:rgba(255,255,255,.1)}
+        .hero .blob.b1{width:140px;height:140px;top:-46px;right:-24px}
+        .hero .blob.b2{width:80px;height:80px;bottom:0;left:-20px;background:rgba(255,255,255,.08)}
+        /* 个人信息卡 */
+        .profile{position:relative;z-index:2;display:flex;align-items:center}
+        .avatar{width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:2px solid rgba(255,255,255,.4)}
+        .profile .p-txt{margin-left:14px;color:#fff}
+        .profile .p-txt h2{font-size:19px;font-weight:600}
+        .profile .p-txt p{font-size:12px;opacity:.9}
+        /* 指标网格 */
+        .metrics{margin:-32px 16px 0;background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:6px 6px;position:relative;z-index:5;display:grid;grid-template-columns:repeat(4,1fr)}
+        .metric{text-align:center;padding:14px 4px}
+        .metric b{font-size:18px;color:var(--ink);display:block}
+        .metric b small{font-size:10px;color:var(--sub);font-weight:normal}
+        .metric span{font-size:11px;color:var(--sub)}
+        /* 档案项 */
+        .sec-title{padding:22px 18px 12px;font-size:15px;font-weight:600;display:flex;align-items:center}
+        .sec-title::before{content:"";width:4px;height:15px;background:var(--brand);border-radius:2px;margin-right:8px}
+        .cards{padding:0 16px 20px}
+        .row{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:15px 16px;margin-bottom:12px;display:flex;align-items:center;transition:transform .15s;cursor:pointer}
+        .row:active{transform:scale(.98)}
+        .row .ic{width:42px;height:42px;border-radius:12px;background:var(--brand-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .row .rm{flex:1;margin-left:14px}
+        .row .rm h4{font-size:15px;font-weight:600}
+        .row .rm p{font-size:12px;color:var(--sub);margin-top:1px}
+        .row .arr{color:#ccc;font-size:16px}
+        .fade{opacity:0;transform:translateY(16px);animation:up .5s forwards}
+        @keyframes up{to{opacity:1;transform:none}}
+        .d1{animation-delay:.05s}.d2{animation-delay:.12s}.d3{animation-delay:.19s}.d4{animation-delay:.26s}
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="top-header">
+        <span class="back" onclick="history.go(-1)">‹</span>
+        <span class="title">健康档案</span>
+        <span class="more">···</span>
+    </div>
+
+    <div class="hero">
+        <div class="blob b1"></div><div class="blob b2"></div>
+        <div class="profile">
+            <div class="avatar">👤</div>
+            <div class="p-txt">
+                <h2>会员用户</h2>
+                <p>男 · 28岁 · 会员编号 CZ2025008</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="metrics fade">
+        <div class="metric"><b>175<small>cm</small></b><span>身高</span></div>
+        <div class="metric"><b>68<small>kg</small></b><span>体重</span></div>
+        <div class="metric"><b>22.2</b><span>BMI</span></div>
+        <div class="metric"><b>A<small>型</small></b><span>血型</span></div>
+    </div>
+
+    <div class="sec-title fade d1">档案详情</div>
+    <div class="cards">
+        <div class="row fade d1">
+            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#ff8a00" stroke-width="1.5"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6" stroke="#ff8a00" stroke-width="1.5"/></svg></div>
+            <div class="rm"><h4>基本信息</h4><p>姓名 · 性别 · 年龄 · 联系方式</p></div>
+            <span class="arr">›</span>
+        </div>
+        <div class="row fade d2">
+            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 21C7 17 4 13.5 4 9.5A4.5 4.5 0 0112 7a4.5 4.5 0 018 2.5c0 4-3 7.5-8 11.5z" stroke="#ff8a00" stroke-width="1.5"/></svg></div>
+            <div class="rm"><h4>既往病史</h4><p>暂无重大疾病史 · 无过敏史</p></div>
+            <span class="arr">›</span>
+        </div>
+        <div class="row fade d3">
+            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 5a2 2 0 012-2h9l5 5v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5z" stroke="#ff8a00" stroke-width="1.5"/><path d="M8 12h8M8 16h5" stroke="#ff8a00" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+            <div class="rm"><h4>体检记录</h4><p>共 6 次体检记录 · 最近 2025-11-08</p></div>
+            <span class="arr">›</span>
+        </div>
+        <div class="row fade d4">
+            <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6" stroke="#ff8a00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="rm"><h4>健康趋势</h4><p>血压 · 血糖 · 体重变化曲线</p></div>
+            <span class="arr">›</span>
+        </div>
+    </div>
+</div>
+</body>
+</html>
