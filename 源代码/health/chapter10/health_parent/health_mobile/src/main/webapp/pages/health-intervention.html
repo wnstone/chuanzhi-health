@@ -285,10 +285,1217 @@ body.lock{overflow:hidden;touch-action:none}
   background:var(--brand-grad);color:#fff;font-size:14px;font-weight:600;
   padding:9px 26px;border-radius:99px;box-shadow:0 4px 14px rgba(255,106,0,.35);
 }
-<!--__CSS2__-->
+/* ============ 8. 方案详情(二级压栈) ============ */
+.detail{
+  position:fixed;top:0;bottom:0;left:0;right:0;margin:0 auto;max-width:750px;
+  background:var(--bg);z-index:50;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  transform:translateX(100%);transition:transform .32s var(--ease);
+  box-shadow:-8px 0 24px rgba(0,0,0,.12);
+}
+.detail.open{transform:translateX(0)}
+.d-head{
+  background:var(--brand-grad);color:#fff;padding:12px 16px 46px;position:relative;overflow:hidden;
+}
+.d-head .d-blob1{position:absolute;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.1);top:-50px;right:-30px}
+.d-head .d-blob2{position:absolute;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.08);bottom:-30px;left:-20px}
+.d-back{display:flex;align-items:center;padding:6px;margin-left:-6px;border-radius:8px;position:relative;z-index:2;width:36px}
+.d-back:active{background:rgba(255,255,255,.15)}
+.d-back svg{width:22px;height:22px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.d-title-row{position:relative;z-index:2;margin-top:8px;display:flex;align-items:center;gap:10px}
+.d-name{font-size:22px;font-weight:700;line-height:1.3;flex:1;min-width:0}
+.d-icon{font-size:34px;flex:none}
+.d-meta{position:relative;z-index:2;margin-top:7px;display:flex;align-items:center;gap:10px;font-size:12px}
+.d-meta .d-cat{background:rgba(255,255,255,.24);padding:1px 10px;border-radius:99px}
+.d-body{padding:0 14px calc(var(--tabbar-h) + 30px);margin-top:-30px;position:relative;z-index:3}
+.d-ring-card{display:flex;align-items:center;gap:16px}
+.d-ring-wrap{position:relative;width:86px;height:86px;flex:none}
+.d-ring-wrap svg{transform:rotate(-90deg)}
+.d-ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700}
+.d-ring-num i{font-style:normal;font-size:11px;font-weight:500;margin-left:1px}
+.d-ring-info{flex:1}
+.d-ring-info .dr-title{font-size:15px;font-weight:600;display:flex;align-items:center;gap:6px}
+.d-ring-info .dr-sub{font-size:12px;color:var(--sub);margin-top:3px}
+.d-done-badge{
+  font-size:11px;color:#fff;background:var(--ok);padding:1px 9px;border-radius:99px;
+  animation:fadeInUp .3s var(--ease);
+}
+.d-desc{font-size:13.5px;color:#55555f;line-height:1.75}
+.d-bars{display:flex;align-items:flex-end;gap:8px;height:86px;padding-top:6px}
+.d-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%}
+.d-bar-track{flex:1;width:100%;max-width:26px;background:#f1f0f5;border-radius:8px;position:relative;overflow:hidden}
+.d-bar-fill{
+  position:absolute;bottom:0;left:0;right:0;border-radius:8px;
+  background:#ffcf9e;transition:height .5s var(--ease);
+}
+.d-bar-col.today .d-bar-fill{background:var(--brand-grad)}
+.d-bar-col .b-day{font-size:10px;color:var(--sub);flex:none}
+.d-bar-col.today .b-day{color:var(--brand2);font-weight:600}
+.btn-del{
+  width:100%;text-align:center;color:var(--danger);font-size:14px;
+  padding:13px;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);
+  margin-top:4px;
+}
+
+/* ============ 9. 打卡视图 ============ */
+.punch-hero{display:flex;flex-direction:column;align-items:center;padding:14px 0 6px}
+.punch-btn{
+  width:122px;height:122px;border-radius:50%;color:#fff;position:relative;
+  background:var(--brand-grad);
+  box-shadow:0 10px 26px rgba(255,106,0,.4);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  font-size:17px;font-weight:700;letter-spacing:1px;
+  transition:transform .15s ease,box-shadow .4s,background .4s;
+}
+.punch-btn:active{transform:scale(.94)}
+.punch-btn .pb-sub{font-size:11px;font-weight:400;opacity:.9;letter-spacing:0}
+.punch-btn.done{
+  background:linear-gradient(135deg,#2bd88b,#21c17a);
+  box-shadow:0 8px 20px rgba(33,193,122,.35);
+  pointer-events:none;
+}
+.punch-btn.boom{animation:punchBoom .5s var(--ease)}
+@keyframes punchBoom{0%{transform:scale(1)}35%{transform:scale(.9)}70%{transform:scale(1.08)}100%{transform:scale(1)}}
+.punch-btn svg{width:26px;height:26px;stroke:#fff;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.punch-btn svg path{stroke-dasharray:26;stroke-dashoffset:26}
+.punch-btn.done svg path{animation:drawTick .35s .1s ease-out forwards}
+.punch-stats{display:flex;width:100%;margin-top:18px}
+.punch-stat{flex:1;text-align:center;position:relative}
+.punch-stat + .punch-stat::before{
+  content:"";position:absolute;left:0;top:20%;height:60%;width:1px;background:#f0f0f4;
+}
+.punch-stat .ps-num{font-size:23px;font-weight:700;line-height:1.2}
+.punch-stat .ps-num em{font-style:normal;font-size:12px;font-weight:400;color:var(--sub)}
+.punch-stat .ps-label{font-size:11.5px;color:var(--sub);margin-top:1px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-head .c-month{font-size:15px;font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px 2px}
+.cal-grid .c-wd{text-align:center;font-size:11px;color:var(--sub);padding:3px 0}
+.cal-cell{
+  aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:12.5px;border-radius:10px;position:relative;color:var(--ink);
+}
+.cal-cell.out{color:#d3d3dc}
+.cal-cell .c-dot{width:5px;height:5px;border-radius:50%;background:transparent;margin-top:1px}
+.cal-cell.punched{background:var(--brand-soft);color:var(--brand2);font-weight:600}
+.cal-cell.punched .c-dot{background:var(--brand2)}
+.cal-cell.today{box-shadow:inset 0 0 0 2px var(--brand)}
+.cal-cell.light-up{animation:cellBump .45s var(--ease)}
+.rec-row{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid #f4f4f8;font-size:13.5px}
+.rec-row:last-child{border-bottom:none}
+.rec-row .r-dot{width:9px;height:9px;border-radius:50%;background:var(--brand);flex:none}
+.rec-row .r-date{flex:1}
+.rec-row .r-time{color:var(--sub);font-size:12.5px}
+.rec-empty{text-align:center;color:var(--sub);font-size:13px;padding:18px 0}
+
+/* ============ 10. 我的视图 ============ */
+.mine-head{display:flex;align-items:center;gap:14px;padding:8px 4px 16px}
+.mine-avatar{
+  width:62px;height:62px;border-radius:50%;background:var(--brand-soft);
+  display:flex;align-items:center;justify-content:center;font-size:32px;flex:none;
+  box-shadow:0 4px 12px rgba(255,138,0,.18);
+}
+.mine-name{font-size:19px;font-weight:700}
+.mine-join{font-size:12px;color:var(--sub);margin-top:2px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.stat-cell{
+  background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:14px;display:flex;flex-direction:column;gap:2px;
+}
+.stat-cell .st-num{font-size:24px;font-weight:700;line-height:1.2}
+.stat-cell .st-num em{font-style:normal;font-size:12px;font-weight:400;color:var(--sub);margin-left:2px}
+.stat-cell .st-label{font-size:12px;color:var(--sub)}
+.badge-wall{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 6px;padding-top:4px}
+.badge-item{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.badge-item .b-ico{
+  width:52px;height:52px;border-radius:50%;font-size:25px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--brand-soft);box-shadow:0 4px 10px rgba(255,138,0,.2);
+}
+.badge-item.locked .b-ico{background:#ededf1;filter:grayscale(1);opacity:.55;box-shadow:none}
+.badge-item .b-name{font-size:12px;font-weight:600}
+.badge-item.locked .b-name{color:var(--sub);font-weight:400}
+.badge-item .b-date{font-size:10px;color:var(--sub);line-height:1.4;padding:0 2px}
+.mine-manage .mg-row{
+  display:flex;align-items:center;gap:10px;padding:12px 2px;font-size:14px;cursor:pointer;
+}
+.mine-manage .mg-row .mg-ico{font-size:18px}
+.mine-manage .mg-row .mg-arrow{margin-left:auto;color:#c9c9d2}
+.mine-manage .mg-sub{font-size:11.5px;color:var(--sub);padding:0 2px 4px}
+
+/* ============ 11. 新增方案抽屉 ============ */
+.sheet-mask{
+  position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:60;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.sheet-mask.on{opacity:1;pointer-events:auto}
+.sheet{
+  position:fixed;bottom:0;left:0;right:0;margin:0 auto;max-width:750px;
+  background:#fff;border-radius:20px 20px 0 0;z-index:61;
+  transform:translateY(100%);transition:transform .32s var(--ease);
+  max-height:86vh;display:flex;flex-direction:column;
+}
+.sheet.open{transform:translateY(0)}
+.sheet-bar{padding:10px 0 4px;display:flex;justify-content:center;flex:none}
+.sheet-bar i{width:40px;height:4px;border-radius:99px;background:#e3e3e9}
+.sheet-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:4px 18px 10px;flex:none;
+}
+.sheet-head .sh-title{font-size:17px;font-weight:700}
+.sheet-head .sh-close{font-size:20px;color:var(--sub);padding:2px 8px}
+.sheet-body{overflow-y:auto;padding:2px 18px 18px;flex:1}
+.f-label{font-size:13px;font-weight:600;margin:14px 0 7px;display:flex;align-items:center}
+.f-label .f-req{color:var(--danger);margin-left:3px}
+.f-label .f-count{margin-left:auto;font-size:11px;color:var(--sub);font-weight:400}
+.f-input{
+  width:100%;border:1.5px solid #ececf1;border-radius:11px;padding:10px 12px;
+  font-size:14px;color:var(--ink);background:#fafafc;transition:border-color .2s;
+}
+.f-input:focus{border-color:var(--brand);background:#fff}
+.f-input.err{border-color:var(--danger);animation:shake .4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+textarea.f-input{resize:none;height:72px;line-height:1.6}
+.cat-pills{display:flex;gap:8px}
+.cat-pill{
+  flex:1;text-align:center;padding:8px 0;border-radius:11px;font-size:13px;
+  background:#f4f4f8;color:var(--sub);border:1.5px solid transparent;transition:all .2s;
+}
+.cat-pill.on{background:var(--brand-soft);color:var(--brand2);border-color:var(--brand);font-weight:600}
+.emoji-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:6px}
+.emoji-cell{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:21px;
+  border-radius:10px;background:#f4f4f8;border:1.5px solid transparent;transition:all .15s;
+}
+.emoji-cell.on{background:var(--brand-soft);border-color:var(--brand);transform:scale(1.08)}
+.t-input-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.t-input-row .f-input{flex:1}
+.t-input-row .t-del{
+  width:26px;height:26px;border-radius:50%;background:#f4f4f8;color:var(--sub);
+  font-size:15px;line-height:1;flex:none;
+}
+.t-add{
+  width:100%;text-align:center;padding:9px;border:1.5px dashed #dcdce4;border-radius:11px;
+  color:var(--sub);font-size:13px;margin-top:2px;
+}
+.t-add:active{background:#fafafc}
+.sheet-foot{padding:10px 18px calc(14px + env(safe-area-inset-bottom,0px));flex:none;border-top:1px solid #f4f4f6}
+.btn-save{
+  width:100%;background:var(--brand-grad);color:#fff;font-size:15px;font-weight:700;
+  padding:12px;border-radius:13px;box-shadow:0 5px 16px rgba(255,106,0,.35);
+}
+.btn-save:active{transform:scale(.98)}
+
+/* ============ 12. Toast / 确认框 / 粒子 ============ */
+.toast-wrap{
+  position:fixed;bottom:calc(var(--tabbar-h) + 26px);left:0;right:0;
+  display:flex;justify-content:center;z-index:80;pointer-events:none;
+}
+.toast{
+  display:flex;align-items:center;gap:7px;max-width:80%;
+  background:rgba(29,29,34,.92);color:#fff;font-size:13.5px;
+  padding:9px 18px;border-radius:99px;box-shadow:0 8px 24px rgba(0,0,0,.2);
+  opacity:0;transform:translateY(14px) scale(.92);
+  transition:opacity .2s ease,transform .2s var(--ease);
+}
+.toast.show{opacity:1;transform:translateY(0) scale(1)}
+.toast.gold{
+  background:linear-gradient(135deg,#ffb340,#ff7a00);
+  box-shadow:0 8px 26px rgba(255,122,0,.45);font-weight:600;
+}
+.toast .tk{
+  width:17px;height:17px;border-radius:50%;background:var(--ok);flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:11px;
+}
+.modal-mask{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:70;
+  display:flex;align-items:center;justify-content:center;padding:0 34px;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.modal-mask.on{opacity:1;pointer-events:auto}
+.modal{
+  background:#fff;border-radius:18px;padding:22px 20px 16px;width:100%;max-width:320px;
+  transform:scale(.9);transition:transform .25s var(--ease);text-align:center;
+}
+.modal-mask.on .modal{transform:scale(1)}
+.modal .m-title{font-size:16px;font-weight:700;margin-bottom:8px}
+.modal .m-text{font-size:13px;color:var(--sub);line-height:1.7;margin-bottom:18px}
+.modal .m-btns{display:flex;gap:10px}
+.modal .m-btns button{flex:1;padding:10px;border-radius:11px;font-size:14px;font-weight:600}
+.modal .m-cancel{background:#f4f4f8;color:var(--sub)}
+.modal .m-ok{background:var(--brand-grad);color:#fff}
+.modal .m-ok.danger{background:linear-gradient(135deg,#ff6055,#f0463c)}
+.pt{
+  position:fixed;width:9px;height:9px;border-radius:50%;z-index:81;pointer-events:none;
+  animation:ptFly .65s ease-out forwards;
+}
+@keyframes ptFly{
+  0%{transform:translate(0,0) scale(1);opacity:1}
+  100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}
+}
+
+/* ============ 13. 响应式 + 无障碍降级 ============ */
+@media (min-width:750px){
+  .fab{right:calc(50% - 375px + 18px)}
+}
+@media (max-width:749px){
+  .fab{right:18px}
+}
+@media (max-width:360px){
+  .ring-wrap{width:138px;height:138px}
+  .ring-wrap svg{width:138px;height:138px}
+  .ring-num{font-size:29px}
+  .emoji-grid{grid-template-columns:repeat(6,1fr)}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}
 </style>
 </head>
 <body>
-<!--__BODY__-->
+<div class="app">
+  <!-- 顶栏 -->
+  <header class="topbar">
+    <div class="tb-side">
+      <button class="tb-back" id="btnHome" aria-label="返回首页">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+    </div>
+    <div class="tb-title" id="topTitle">健康干预</div>
+    <div class="tb-side"></div>
+  </header>
+
+  <!-- SVG 渐变定义(供环形图引用) -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#ff8a00"/><stop offset="100%" stop-color="#ff6a00"/>
+      </linearGradient>
+      <linearGradient id="ringGradOk" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#2bd88b"/><stop offset="100%" stop-color="#21c17a"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <!-- 视图容器 -->
+  <main class="stage" id="stage">
+
+    <!-- Tab1 概览 -->
+    <section class="view active" id="view-overview">
+      <div class="greet">
+        <div>
+          <h2 id="greetText">你好</h2>
+          <div class="g-sub" id="greetDate"></div>
+        </div>
+        <div class="g-avatar">👨‍⚕️</div>
+      </div>
+      <div class="card ring-card">
+        <div class="ring-wrap" id="bigRingWrap">
+          <svg width="160" height="160" viewBox="0 0 160 160">
+            <circle class="ring-bg" cx="80" cy="80" r="70"/>
+            <circle class="ring-fg" id="bigRingFg" cx="80" cy="80" r="70"/>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-num"><span id="bigRingNum">0</span><i>%</i></div>
+            <div class="ring-label">今日完成度</div>
+          </div>
+        </div>
+        <div class="ring-side">
+          <div class="side-item">
+            <div class="s-num">🔥 <span id="ovStreak">0</span><em>天</em></div>
+            <div class="s-label" id="ovStreakLabel">连续打卡</div>
+          </div>
+          <div class="side-item">
+            <div class="s-num" id="ovDone">0/0</div>
+            <div class="s-label">今日已完成</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📅 本周完成热力</div>
+        <div class="heat-row" id="weekHeat"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📈 近 7 天趋势</div>
+        <div class="trend-box">
+          <svg id="trendSvg" viewBox="0 0 300 64" preserveAspectRatio="none">
+            <polygon class="trend-area" id="trendArea" points=""/>
+            <polyline class="trend-line" id="trendLine" points=""/>
+            <circle class="trend-dot" id="trendDot" r="4" cx="0" cy="0"/>
+          </svg>
+          <div class="trend-labels" id="trendLabels"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">✅ 今日任务 <span class="more-link" id="ovTaskCount"></span></div>
+        <div id="todayTasks"></div>
+      </div>
+      <div class="quick-row">
+        <div class="quick-card pressable" data-goto="checkin">
+          <div class="q-ico">📍</div>
+          <div><div class="q-name">去打卡</div><div class="q-sub" id="quickPunchSub">保持连续记录</div></div>
+        </div>
+        <div class="quick-card alt pressable" data-goto="plans">
+          <div class="q-ico">📋</div>
+          <div><div class="q-name">看方案</div><div class="q-sub" id="quickPlanSub">全部干预方案</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab2 方案 -->
+    <section class="view" id="view-plans">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="searchInput" placeholder="搜索方案名称、说明或任务" maxlength="20">
+        <button class="s-clear hidden" id="searchClear">×</button>
+      </div>
+      <div class="chip-row" id="chipRow">
+        <div class="chip-pill" id="chipPill"></div>
+        <button class="chip active" data-cat="all">全部</button>
+        <button class="chip" data-cat="diet">饮食</button>
+        <button class="chip" data-cat="sport">运动</button>
+        <button class="chip" data-cat="sleep">作息</button>
+        <button class="chip" data-cat="mind">心理</button>
+      </div>
+      <div id="planList"></div>
+    </section>
+
+    <!-- Tab3 打卡 -->
+    <section class="view" id="view-checkin">
+      <div class="card punch-hero">
+        <button class="punch-btn" id="punchBtn">
+          <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+          <span id="punchBtnText">打卡</span>
+          <span class="pb-sub" id="punchBtnSub"></span>
+        </button>
+        <div class="punch-stats">
+          <div class="punch-stat">
+            <div class="ps-num"><span id="punchStreakNum">0</span><em> 天</em></div>
+            <div class="ps-label" id="punchStreakLabel">连续打卡</div>
+          </div>
+          <div class="punch-stat">
+            <div class="ps-num"><span id="punchTotal">0</span><em> 天</em></div>
+            <div class="ps-label">累计打卡</div>
+          </div>
+          <div class="punch-stat">
+            <div class="ps-num"><span id="punchMax">0</span><em> 天</em></div>
+            <div class="ps-label">最长连续</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cal-head">
+          <div class="card-title" style="margin-bottom:0">🗓️ 本月打卡</div>
+          <div class="c-month" id="calTitle"></div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🕐 打卡记录</div>
+        <div id="punchRecords"></div>
+      </div>
+    </section>
+
+    <!-- Tab4 我的 -->
+    <section class="view" id="view-mine">
+      <div class="mine-head">
+        <div class="mine-avatar">👨‍⚕️</div>
+        <div>
+          <div class="mine-name" id="mineName"></div>
+          <div class="mine-join" id="mineJoin"></div>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-cell"><div class="st-num"><span id="stTotalPunch">0</span><em>天</em></div><div class="st-label">累计打卡</div></div>
+        <div class="stat-cell"><div class="st-num"><span id="stTotalDone">0</span><em>次</em></div><div class="st-label">累计完成任务</div></div>
+        <div class="stat-cell"><div class="st-num"><span id="stCustom">0</span><em>个</em></div><div class="st-label">自定义方案</div></div>
+        <div class="stat-cell"><div class="st-num"><span id="stMaxStreak">0</span><em>天</em></div><div class="st-label">最长连续纪录</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏅 成就徽章 <span class="more-link" id="badgeCount"></span></div>
+        <div class="badge-wall" id="badgeWall"></div>
+      </div>
+      <div class="card mine-manage">
+        <div class="card-title">⚙️ 数据管理</div>
+        <div class="mg-row pressable" id="restoreBtn">
+          <span class="mg-ico">🔄</span><span>恢复演示数据</span><span class="mg-arrow">›</span>
+        </div>
+        <div class="mg-sub">清空当前所有记录,恢复为初始演示数据</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 详情压暗遮罩 -->
+  <div class="dim" id="dim"></div>
+
+  <!-- 方案详情(二级视图) -->
+  <section class="detail" id="detail">
+    <div class="d-head">
+      <div class="d-blob1"></div><div class="d-blob2"></div>
+      <button class="d-back" id="detailBack" aria-label="返回">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="d-title-row">
+        <div class="d-name" id="detailName"></div>
+        <div class="d-icon" id="detailIcon"></div>
+      </div>
+      <div class="d-meta">
+        <span class="d-cat" id="detailCat"></span>
+        <span id="detailDays"></span>
+      </div>
+    </div>
+    <div class="d-body">
+      <div class="card d-ring-card">
+        <div class="d-ring-wrap">
+          <svg width="86" height="86" viewBox="0 0 86 86">
+            <circle class="ring-bg" cx="43" cy="43" r="36" style="stroke-width:9"/>
+            <circle class="ring-fg" id="dRingFg" cx="43" cy="43" r="36" style="stroke-width:9"/>
+          </svg>
+          <div class="d-ring-num"><span id="dRingNum">0</span><i>%</i></div>
+        </div>
+        <div class="d-ring-info">
+          <div class="dr-title">今日进度 <span class="d-done-badge hidden" id="dDoneBadge">已全部完成 ✓</span></div>
+          <div class="dr-sub" id="dRingSub"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📖 方案说明</div>
+        <div class="d-desc" id="detailDesc"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📝 每日任务清单</div>
+        <div id="detailTasks"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 近 7 天完成情况</div>
+        <div class="d-bars" id="detailBars"></div>
+      </div>
+      <button class="btn-del hidden" id="detailDelete">删除此方案</button>
+    </div>
+  </section>
+
+  <!-- 底部 Tab 栏 -->
+  <nav class="tabbar" id="tabbar">
+    <button class="tab-item active" data-tab="overview">
+      <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      <span>概览</span>
+    </button>
+    <button class="tab-item" data-tab="plans">
+      <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+      <span>方案</span>
+    </button>
+    <button class="tab-item" data-tab="checkin">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>
+      <span>打卡</span>
+    </button>
+    <button class="tab-item" data-tab="mine">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"/></svg>
+      <span>我的</span>
+    </button>
+  </nav>
+
+  <!-- 新增方案 FAB -->
+  <button class="fab hidden" id="fab" aria-label="新增方案">+</button>
+</div>
+
+<!-- 新增方案抽屉 -->
+<div class="sheet-mask" id="sheetMask"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-bar"><i></i></div>
+  <div class="sheet-head">
+    <div class="sh-title">新增自定义方案</div>
+    <button class="sh-close" id="sheetClose">×</button>
+  </div>
+  <div class="sheet-body">
+    <div class="f-label">方案名称<span class="f-req">*</span><span class="f-count" id="fNameCount">0/12</span></div>
+    <input class="f-input" id="fName" type="text" maxlength="12" placeholder="例如:每日八杯水计划">
+    <div class="f-label">所属分类<span class="f-req">*</span></div>
+    <div class="cat-pills" id="catPills">
+      <button class="cat-pill on" data-cat="diet">饮食</button>
+      <button class="cat-pill" data-cat="sport">运动</button>
+      <button class="cat-pill" data-cat="sleep">作息</button>
+      <button class="cat-pill" data-cat="mind">心理</button>
+    </div>
+    <div class="f-label">方案图标</div>
+    <div class="emoji-grid" id="emojiGrid"></div>
+    <div class="f-label">方案说明</div>
+    <textarea class="f-input" id="fDesc" maxlength="100" placeholder="简单描述这个方案的目标和内容(选填)"></textarea>
+    <div class="f-label">每日任务<span class="f-req">*</span><span class="f-count">至少 1 条</span></div>
+    <div id="taskRows"></div>
+    <button class="t-add" id="addTaskBtn">+ 添加任务</button>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn-save" id="saveBtn">保存方案</button>
+  </div>
+</div>
+
+<!-- 确认弹层 -->
+<div class="modal-mask" id="modalMask">
+  <div class="modal">
+    <div class="m-title" id="modalTitle"></div>
+    <div class="m-text" id="modalText"></div>
+    <div class="m-btns">
+      <button class="m-cancel" id="modalCancel">取消</button>
+      <button class="m-ok" id="modalOk">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-wrap"><div class="toast" id="toast"></div></div>
+
+<script>
+'use strict';
+/* ================= 1. 日期工具(统一收口,禁用 toISOString) ================= */
+function pad2(n){ return n < 10 ? '0' + n : '' + n; }
+function todayKey(){
+  var d = new Date();
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+}
+function addDays(key, delta){
+  var p = key.split('-');
+  var d = new Date(+p[0], +p[1] - 1, +p[2] + delta);
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+}
+function nowHM(){
+  var d = new Date();
+  return pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+}
+function fmtCN(key){
+  var p = key.split('-');
+  return +p[1] + '月' + +p[2] + '日';
+}
+function diffDays(fromKey, toKey){
+  var a = fromKey.split('-'), b = toKey.split('-');
+  var d1 = new Date(+a[0], +a[1] - 1, +a[2]);
+  var d2 = new Date(+b[0], +b[1] - 1, +b[2]);
+  return Math.round((d2 - d1) / 86400000);
+}
+var WEEK_CN = ['日','一','二','三','四','五','六'];
+function weekCN(key){
+  var p = key.split('-');
+  return WEEK_CN[new Date(+p[0], +p[1] - 1, +p[2]).getDay()];
+}
+
+/* ================= 2. 常量与全局态 ================= */
+var STORAGE_KEY = 'health_iv_v1';
+var DATA_VERSION = 1;
+var TAB_ORDER = ['overview', 'plans', 'checkin', 'mine'];
+var TAB_TITLE = { overview:'健康干预', plans:'干预方案', checkin:'每日打卡', mine:'我的健康' };
+var CATS = {
+  diet:  { name:'饮食', color:'#ff8a00' },
+  sport: { name:'运动', color:'#21c17a' },
+  sleep: { name:'作息', color:'#6f7bf7' },
+  mind:  { name:'心理', color:'#f75c8d' }
+};
+var EMOJIS = ['🥗','🏃','😴','🧘','💧','🚶','📖','🎯','💪'];
+var BADGE_DEFS = [
+  { id:'first_checkin', name:'初来乍到', icon:'🌱', cond:'完成首次打卡' },
+  { id:'streak7',       name:'坚持一周', icon:'🔥', cond:'连续打卡 7 天' },
+  { id:'streak21',      name:'习惯养成', icon:'⭐', cond:'连续打卡 21 天' },
+  { id:'task50',        name:'任务达人', icon:'🎯', cond:'累计完成 50 项任务' },
+  { id:'task100',       name:'百炼成钢', icon:'💪', cond:'累计完成 100 项任务' },
+  { id:'designer',      name:'方案设计师', icon:'✏️', cond:'创建首个自定义方案' },
+  { id:'perfect_day',   name:'完美一天', icon:'🏆', cond:'某天完成率达 100%' },
+  { id:'early_bird',    name:'早起鸟',   icon:'🌅', cond:'9 点前完成任意任务' }
+];
+
+var state = null;
+var ui = {
+  view: 'overview',
+  detailPlanId: null,
+  filter: { category:'all', keyword:'' },
+  isAnimating: false,
+  sheetOpen: false,
+  detailOpen: false,
+  lastDay: null,
+  heatLv: [],           // 上次渲染的热力档位,用于单格变化动画
+  newPlanId: null       // 新建方案,用于列表高亮定位
+};
+var $ = function(id){ return document.getElementById(id); };
+function esc(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/* ================= 3. 种子数据(相对今天回填,首屏就是活数据) ================= */
+function seedState(){
+  var t = todayKey();
+  var d = function(n){ return addDays(t, n); };
+  var s = {
+    version: DATA_VERSION,
+    seq: 20,
+    user: { name:'张先生', joinDate: d(-20) },
+    plans: [
+      {
+        id:'p1', name:'高血压饮食干预', category:'diet',
+        desc:'针对血压偏高人群的低盐低脂饮食方案:控制每日钠摄入在5g以内,增加钾、镁、膳食纤维摄入,少油少糖,规律三餐。坚持4周可观察到血压平稳改善。',
+        img:'../img/widget-program01.png', icon:'🥗', createdAt: d(-9), custom:false,
+        tasks: [
+          { id:'t1', text:'早餐盐摄入控制在2g以内' },
+          { id:'t2', text:'午餐以清蒸、水煮为主' },
+          { id:'t3', text:'全天饮水不少于1500ml' },
+          { id:'t4', text:'不吃腌制、加工食品' },
+          { id:'t5', text:'晚餐七分饱,20:00前完成' }
+        ]
+      },
+      {
+        id:'p2', name:'减脂塑形运动计划', category:'sport',
+        desc:'有氧+力量结合的减脂方案:每日30分钟中等强度有氧打底,配合核心与下肢力量训练,拉伸收尾防止损伤。建议配合饮食方案同步执行,效果加倍。',
+        img:'../img/widget-nav-1.png', icon:'🏃', createdAt: d(-7), custom:false,
+        tasks: [
+          { id:'t1', text:'热身拉伸10分钟' },
+          { id:'t2', text:'有氧运动30分钟(快走/慢跑)' },
+          { id:'t3', text:'平板支撑3组,每组45秒' },
+          { id:'t4', text:'深蹲3组,每组15个' },
+          { id:'t5', text:'运动后放松拉伸5分钟' }
+        ]
+      },
+      {
+        id:'p3', name:'睡眠改善21天计划', category:'sleep',
+        desc:'通过固定作息节律、睡前减少蓝光刺激、放松身心等方式重建睡眠习惯。21天为一个养成周期,期间尽量不熬夜、不补觉,让生物钟稳定下来。',
+        img:'../img/widget-nav-2.png', icon:'😴', createdAt: d(-6), custom:false,
+        tasks: [
+          { id:'t1', text:'22:30后不再看手机' },
+          { id:'t2', text:'23:30前上床睡觉' },
+          { id:'t3', text:'睡前温水泡脚10分钟' },
+          { id:'t4', text:'起床后拉开窗帘晒太阳' }
+        ]
+      },
+      {
+        id:'p4', name:'情绪减压正念练习', category:'mind',
+        desc:'面向工作压力大、情绪易紧张人群的正念干预:每天用短时间的呼吸练习和感恩记录,把注意力拉回当下,降低焦虑水平,提升情绪稳定性。',
+        img:'../img/widget-nav-3.png', icon:'🧘', createdAt: d(-5), custom:false,
+        tasks: [
+          { id:'t1', text:'正念呼吸练习10分钟' },
+          { id:'t2', text:'写下3件值得感恩的小事' },
+          { id:'t3', text:'午后闭眼放空5分钟' },
+          { id:'t4', text:'睡前身体扫描放松' }
+        ]
+      },
+      {
+        id:'p5', name:'每日万步走', category:'sport',
+        desc:'最容易坚持的基础有氧方案:把步行拆进日常场景,上下班、午后、晚饭后分段累计,每天走满10000步,提升心肺功能、控制体重。',
+        img:'../img/widget-nav-4.png', icon:'🚶', createdAt: d(-8), custom:false,
+        tasks: [
+          { id:'t1', text:'上午步行3000步' },
+          { id:'t2', text:'午饭后散步15分钟' },
+          { id:'t3', text:'全天累计10000步' }
+        ]
+      }
+    ],
+    checkLog: {},
+    punchLog: [],
+    punchTimes: {},
+    badges: {}
+  };
+  // 徽章初始化为未解锁
+  BADGE_DEFS.forEach(function(b){ s.badges[b.id] = null; });
+  // 回填近7天勾选历史:完成率故意造 40%~100% 起伏,趋势线像真人用过
+  var allKeys = [];
+  s.plans.forEach(function(p){
+    p.tasks.forEach(function(tk){ allKeys.push(p.id + ':' + tk.id); });
+  });
+  var rates = { '-7':0.5, '-6':0.4, '-5':0.65, '-4':0.45, '-3':1.0, '-2':0.55, '-1':0.7 };
+  Object.keys(rates).forEach(function(off){
+    var day = d(+off);
+    var count = Math.round(allKeys.length * rates[off]);
+    var bucket = {};
+    for (var i = 0; i < count; i++){
+      // 每天从不同偏移取任务,避免永远同一批
+      var idx = (i + (-off) * 3) % allKeys.length;
+      bucket[allKeys[idx]] = true;
+    }
+    s.checkLog[day] = bucket;
+  });
+  // 今天先勾8项(约40%),留大半给演示时现场勾
+  var todaySeed = ['p1:t1','p1:t2','p2:t1','p3:t1','p3:t2','p4:t1','p5:t1','p5:t2'];
+  var tb = {};
+  todaySeed.forEach(function(k){ tb[k] = true; });
+  s.checkLog[t] = tb;
+  // 连续6天打卡(今天没打,留给演示;再打一天正好触发"坚持一周")
+  var times = ['07:32','08:05','07:48','09:12','08:26','07:55'];
+  for (var i = 6; i >= 1; i--){
+    var day = d(-i);
+    s.punchLog.push(day);
+    s.punchTimes[day] = times[6 - i];
+  }
+  // 已解锁的徽章(与回填历史自洽)
+  s.badges.first_checkin = d(-6);
+  s.badges.task50 = d(-3);
+  s.badges.perfect_day = d(-3);
+  return s;
+}
+
+/* ================= 4. localStorage 读写 + 版本校验(坏数据自愈) ================= */
+function save(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){ /* 存储满/隐私模式,静默降级为内存态 */ }
+}
+function load(){
+  var raw = null, parsed = null;
+  try{ raw = localStorage.getItem(STORAGE_KEY); }catch(e){}
+  if (raw){
+    try{ parsed = JSON.parse(raw); }catch(e){ parsed = null; }
+  }
+  if (parsed && parsed.version === DATA_VERSION &&
+      Array.isArray(parsed.plans) && parsed.checkLog && Array.isArray(parsed.punchLog)){
+    state = parsed;
+    if (!state.punchTimes) state.punchTimes = {};
+    if (!state.badges) state.badges = {};
+    BADGE_DEFS.forEach(function(b){
+      if (!(b.id in state.badges)) state.badges[b.id] = null;
+    });
+  }else{
+    state = seedState();
+    save();
+    if (raw) setTimeout(function(){ toast('本地数据已损坏,已恢复演示数据', 'info'); }, 600);
+  }
+}
+
+/* ================= 5. 派生 selector(纯函数现算,绝不落盘) ================= */
+function getPlan(id){
+  for (var i = 0; i < state.plans.length; i++){
+    if (state.plans[i].id === id) return state.plans[i];
+  }
+  return null;
+}
+function getTotalTaskCount(){
+  return state.plans.reduce(function(n, p){ return n + p.tasks.length; }, 0);
+}
+function getDayDoneCount(dayKey){
+  var bucket = state.checkLog[dayKey];
+  if (!bucket) return 0;
+  // 只统计仍存在的方案任务(方案删除后历史键不计入)
+  var n = 0;
+  Object.keys(bucket).forEach(function(k){
+    var pid = k.split(':')[0];
+    if (getPlan(pid)) n++;
+  });
+  return n;
+}
+function getDayRate(dayKey){
+  var total = getTotalTaskCount();
+  return total ? Math.min(1, getDayDoneCount(dayKey) / total) : 0;
+}
+function isChecked(pid, tid, dayKey){
+  var bucket = state.checkLog[dayKey || todayKey()];
+  return !!(bucket && bucket[pid + ':' + tid]);
+}
+function getPlanDoneCount(pid, dayKey){
+  var bucket = state.checkLog[dayKey || todayKey()];
+  if (!bucket) return 0;
+  var n = 0, prefix = pid + ':';
+  Object.keys(bucket).forEach(function(k){
+    if (k.indexOf(prefix) === 0) n++;
+  });
+  return n;
+}
+function getPlanRate(pid, dayKey){
+  var p = getPlan(pid);
+  if (!p || !p.tasks.length) return 0;
+  return Math.min(1, getPlanDoneCount(pid, dayKey) / p.tasks.length);
+}
+function isPunched(dayKey){
+  return state.punchLog.indexOf(dayKey || todayKey()) >= 0;
+}
+function getStreak(){
+  // 昨日锚点宽容算法:今天没打不清零,从昨天往回数
+  var t = todayKey();
+  var punchedToday = isPunched(t);
+  var anchor = punchedToday ? t : addDays(t, -1);
+  var n = 0;
+  while (isPunched(anchor)){ n++; anchor = addDays(anchor, -1); }
+  return { days: n, punchedToday: punchedToday };
+}
+function getMaxStreak(){
+  if (!state.punchLog.length) return 0;
+  var log = state.punchLog.slice().sort();
+  var max = 1, cur = 1;
+  for (var i = 1; i < log.length; i++){
+    if (diffDays(log[i - 1], log[i]) === 1) cur++;
+    else if (log[i] !== log[i - 1]) cur = 1;
+    if (cur > max) max = cur;
+  }
+  return max;
+}
+function getPersistDays(plan){
+  return Math.max(1, diffDays(plan.createdAt, todayKey()) + 1);
+}
+function getTotalDone(){
+  var n = 0;
+  Object.keys(state.checkLog).forEach(function(day){
+    n += Object.keys(state.checkLog[day]).length;
+  });
+  return n;
+}
+function getLast7Days(){
+  var t = todayKey(), arr = [];
+  for (var i = 6; i >= 0; i--) arr.push(addDays(t, -i));
+  return arr;
+}
+function heatLevel(rate){
+  if (rate <= 0) return 0;
+  if (rate < 0.25) return 1;
+  if (rate < 0.5) return 2;
+  if (rate < 0.8) return 3;
+  return 4;
+}
+function filterPlans(){
+  var kw = ui.filter.keyword.trim().toLowerCase();
+  var cat = ui.filter.category;
+  return state.plans.filter(function(p){
+    if (cat !== 'all' && p.category !== cat) return false;
+    if (!kw) return true;
+    if (p.name.toLowerCase().indexOf(kw) >= 0) return true;
+    if ((p.desc || '').toLowerCase().indexOf(kw) >= 0) return true;
+    for (var i = 0; i < p.tasks.length; i++){
+      if (p.tasks[i].text.toLowerCase().indexOf(kw) >= 0) return true;
+    }
+    return false;
+  });
+}
+
+/* ================= 6. 可中断 tween 引擎(rAF,数字与环共用) ================= */
+var tweens = new Map();
+function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
+function tween(id, to, dur, onUpdate){
+  var rec = tweens.get(id);
+  var from = rec ? rec.cur : 0;
+  if (rec && rec.raf) cancelAnimationFrame(rec.raf);
+  if (from === to){
+    tweens.set(id, { cur: to, raf: null });
+    onUpdate(to);
+    return;
+  }
+  var start = performance.now();
+  var obj = { cur: from, raf: null };
+  tweens.set(id, obj);
+  function frame(now){
+    var t = Math.min(1, (now - start) / dur);
+    obj.cur = from + (to - from) * easeOutCubic(t);
+    onUpdate(obj.cur);
+    if (t < 1) obj.raf = requestAnimationFrame(frame);
+    else { obj.cur = to; obj.raf = null; }
+  }
+  obj.raf = requestAnimationFrame(frame);
+}
+/* 环形图工具:按半径算周长,驱动 dashoffset */
+function ringLen(r){ return 2 * Math.PI * r; }
+function setRing(el, r, rate){
+  var C = ringLen(r);
+  el.style.strokeDasharray = C;
+  el.style.strokeDashoffset = C * (1 - Math.min(1, Math.max(0, rate)));
+}
+/* ================= 7. 渲染:概览 ================= */
+function greeting(){
+  if (getDayRate(todayKey()) >= 1) return '今日目标达成 🎉';
+  var h = new Date().getHours();
+  if (h < 6) return '凌晨好,' + state.user.name;
+  if (h < 9) return '早上好,' + state.user.name;
+  if (h < 12) return '上午好,' + state.user.name;
+  if (h < 14) return '中午好,' + state.user.name;
+  if (h < 18) return '下午好,' + state.user.name;
+  return '晚上好,' + state.user.name;
+}
+function checkboxHTML(on){
+  return '<span class="ck' + (on ? ' on' : '') + '"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>';
+}
+function renderOverview(){
+  var t = todayKey();
+  $('greetText').textContent = greeting();
+  $('greetDate').textContent = fmtCN(t) + ' 星期' + weekCN(t);
+  // 大环 + 中心数字:同一个 tween 驱动,永远同步
+  var rate = getDayRate(t);
+  var wrap = $('bigRingWrap'), fg = $('bigRingFg'), num = $('bigRingNum');
+  wrap.classList.toggle('full', rate >= 1);
+  tween('bigRing', rate, 600, function(v){
+    setRing(fg, 70, v);
+    num.textContent = Math.round(v * 100);
+  });
+  // 环旁两枚小数据
+  var st = getStreak();
+  tween('ovStreak', st.days, 500, function(v){
+    $('ovStreak').textContent = Math.round(v);
+  });
+  $('ovStreakLabel').textContent = st.punchedToday ? '连续打卡' : '连续打卡(今天还没打)';
+  $('ovDone').textContent = getDayDoneCount(t) + '/' + getTotalTaskCount();
+  $('quickPunchSub').textContent = st.punchedToday ? '今日已打卡 ✓' : '今天还没打卡哦';
+  $('quickPlanSub').textContent = '共 ' + state.plans.length + ' 个方案';
+  renderWeekHeat();
+  renderTrend();
+  renderTodayTasks();
+}
+function renderWeekHeat(){
+  var days = getLast7Days(), t = todayKey();
+  var html = '';
+  var lvs = [];
+  days.forEach(function(day, i){
+    var lv = heatLevel(getDayRate(day));
+    lvs.push(lv);
+    var bump = ui.heatLv.length === 7 && ui.heatLv[i] !== lv;
+    html += '<div class="heat-cell lv' + lv +
+      (day === t ? ' today' : '') + (bump ? ' bump' : '') + '">' +
+      '<div class="h-block"></div>' +
+      '<div class="h-day">' + (day === t ? '今天' : '周' + weekCN(day)) + '</div></div>';
+  });
+  ui.heatLv = lvs;
+  $('weekHeat').innerHTML = html;
+}
+function renderTrend(){
+  var days = getLast7Days();
+  var W = 300, H = 64, padX = 10, top = 8, bottom = 10;
+  var pts = days.map(function(day, i){
+    var x = padX + i * ((W - padX * 2) / 6);
+    var y = (H - bottom) - getDayRate(day) * (H - top - bottom);
+    return [x, y];
+  });
+  var line = $('trendLine'), area = $('trendArea'), dot = $('trendDot');
+  var lastX = pts[6][0], lastTargetY = pts[6][1];
+  var head = pts.slice(0, 6).map(function(p){ return p[0] + ',' + p[1]; }).join(' ');
+  // 前6点直接定位,最后一个点用 tween 顶上去(今天的因果感)
+  tween('trendY', lastTargetY, 600, function(y){
+    line.setAttribute('points', head + ' ' + lastX + ',' + y);
+    area.setAttribute('points',
+      padX + ',' + (H - bottom) + ' ' + head + ' ' + lastX + ',' + y + ' ' + lastX + ',' + (H - bottom));
+    dot.setAttribute('cx', lastX);
+    dot.setAttribute('cy', y);
+  });
+  var labels = '';
+  days.forEach(function(day){
+    labels += '<span>' + (day === todayKey() ? '今天' : fmtCN(day)) + '</span>';
+  });
+  $('trendLabels').innerHTML = labels;
+}
+function renderTodayTasks(){
+  var t = todayKey();
+  var rows = [];
+  state.plans.forEach(function(p){
+    p.tasks.forEach(function(tk){
+      rows.push({ p: p, tk: tk, done: isChecked(p.id, tk.id, t) });
+    });
+  });
+  rows.sort(function(a, b){ return a.done === b.done ? 0 : (a.done ? 1 : -1); });
+  $('ovTaskCount').textContent = getDayDoneCount(t) + '/' + rows.length;
+  if (!rows.length){
+    $('todayTasks').innerHTML =
+      '<div class="empty-box"><div class="e-ico">🌱</div>' +
+      '<div class="e-text">还没有任何方案,先去创建一个吧</div>' +
+      '<button class="btn-orange" data-goto="plans">去看看</button></div>';
+    return;
+  }
+  var html = '';
+  rows.forEach(function(r){
+    html += '<div class="task-row' + (r.done ? ' done' : '') +
+      '" data-toggle="1" data-pid="' + r.p.id + '" data-tid="' + r.tk.id + '">' +
+      checkboxHTML(r.done) +
+      '<span class="t-text">' + esc(r.tk.text) + '</span>' +
+      '<span class="t-plan">' + esc(r.p.name) + '</span></div>';
+  });
+  $('todayTasks').innerHTML = html;
+}
+
+/* ================= 8. 渲染:方案列表 ================= */
+function planCardHTML(p, idx){
+  var cat = CATS[p.category] || CATS.diet;
+  var done = getPlanDoneCount(p.id);
+  var total = p.tasks.length;
+  var rate = total ? done / total : 0;
+  var cover = '<div class="p-cover">' +
+    '<span class="cov-emoji">' + (p.icon || '📋') + '</span>' +
+    (p.img ? '<img src="' + esc(p.img) + '" alt="" onerror="this.style.display=\'none\'">' : '') +
+    (p.custom ? '<span class="p-corner">自定义</span>' : '') +
+    '</div>';
+  return '<div class="plan-card pressable fadein' + (p.id === ui.newPlanId ? ' newcard' : '') +
+    '" data-open="' + p.id + '" style="animation-delay:' + (idx * 40) + 'ms">' +
+    cover +
+    '<div class="p-body">' +
+      '<div class="p-head"><div class="p-name">' + esc(p.name) + '</div>' +
+      '<span class="p-cat" style="background:' + cat.color + '">' + cat.name + '</span></div>' +
+      '<div class="p-meta"><span>已坚持 <b>' + getPersistDays(p) + '</b> 天</span>' +
+      '<span>今日 <b>' + done + '/' + total + '</b> 项</span></div>' +
+      '<div class="pbar' + (rate >= 1 ? ' green' : '') + '"><i style="width:' + Math.round(rate * 100) + '%"></i></div>' +
+    '</div></div>';
+}
+function renderPlans(){
+  var list = filterPlans();
+  var box = $('planList');
+  if (!list.length){
+    box.innerHTML =
+      '<div class="empty-box"><div class="e-ico">🔍</div>' +
+      '<div class="e-text">没找到相关方案,换个关键词试试?</div>' +
+      '<button class="btn-orange" data-newplan="1">新建一个</button></div>';
+  }else{
+    var html = '';
+    list.forEach(function(p, i){ html += planCardHTML(p, i); });
+    box.innerHTML = html;
+    if (ui.newPlanId){
+      var el = box.querySelector('.newcard');
+      if (el) setTimeout(function(){ el.scrollIntoView({ behavior:'smooth', block:'center' }); }, 120);
+      setTimeout(function(){ ui.newPlanId = null; }, 2200);
+    }
+  }
+  movePill();
+}
+function movePill(){
+  var row = $('chipRow'), pill = $('chipPill');
+  var act = row.querySelector('.chip.active');
+  if (!act) return;
+  pill.style.width = act.offsetWidth + 'px';
+  pill.style.transform = 'translateX(' + act.offsetLeft + 'px)';
+}
+
+/* ================= 9. 渲染:方案详情 ================= */
+function renderDetail(){
+  var p = ui.detailPlanId && getPlan(ui.detailPlanId);
+  if (!p) return;
+  var cat = CATS[p.category] || CATS.diet;
+  $('detailName').textContent = p.name;
+  $('detailIcon').textContent = p.icon || '📋';
+  $('detailCat').textContent = cat.name;
+  $('detailDays').textContent = '已坚持 ' + getPersistDays(p) + ' 天' + (p.custom ? ' · 自定义方案' : '');
+  $('detailDesc').textContent = p.desc || '暂无说明,点滴坚持,静待改变。';
+  var done = getPlanDoneCount(p.id), total = p.tasks.length;
+  var rate = total ? done / total : 0;
+  tween('dRing', rate, 500, function(v){
+    setRing($('dRingFg'), 36, v);
+    $('dRingNum').textContent = Math.round(v * 100);
+  });
+  $('dRingSub').textContent = '今日已完成 ' + done + ' / ' + total + ' 项任务';
+  $('dDoneBadge').classList.toggle('hidden', rate < 1);
+  // 任务清单
+  var html = '';
+  p.tasks.forEach(function(tk){
+    var on = isChecked(p.id, tk.id);
+    html += '<div class="task-row' + (on ? ' done' : '') +
+      '" data-toggle="1" data-pid="' + p.id + '" data-tid="' + tk.id + '">' +
+      checkboxHTML(on) +
+      '<span class="t-text">' + esc(tk.text) + '</span></div>';
+  });
+  $('detailTasks').innerHTML = html;
+  // 近7天完成小条形图
+  var bars = '';
+  getLast7Days().forEach(function(day){
+    var r = getPlanRate(p.id, day);
+    bars += '<div class="d-bar-col' + (day === todayKey() ? ' today' : '') + '">' +
+      '<div class="d-bar-track"><div class="d-bar-fill" style="height:' + Math.round(r * 100) + '%"></div></div>' +
+      '<span class="b-day">' + (day === todayKey() ? '今天' : weekCN(day)) + '</span></div>';
+  });
+  $('detailBars').innerHTML = bars;
+  $('detailDelete').classList.toggle('hidden', !p.custom);
+}
+
+/* ================= 10. 渲染:打卡 ================= */
+function renderCheckin(){
+  var t = todayKey();
+  var punched = isPunched(t);
+  var btn = $('punchBtn');
+  btn.classList.toggle('done', punched);
+  $('punchBtnText').textContent = punched ? '已打卡' : '打卡';
+  $('punchBtnSub').textContent = punched ? (state.punchTimes[t] || '') : fmtCN(t);
+  var st = getStreak();
+  tween('punchStreak', st.days, 600, function(v){
+    $('punchStreakNum').textContent = Math.round(v);
+  });
+  $('punchStreakLabel').textContent = st.punchedToday ? '连续打卡' : '连续打卡(今天还没打)';
+  tween('punchTotal', state.punchLog.length, 600, function(v){
+    $('punchTotal').textContent = Math.round(v);
+  });
+  tween('punchMax', getMaxStreak(), 600, function(v){
+    $('punchMax').textContent = Math.round(v);
+  });
+  renderCalendar();
+  renderPunchRecords();
+}
+function renderCalendar(justPunched){
+  var now = new Date();
+  var y = now.getFullYear(), m = now.getMonth();
+  $('calTitle').textContent = y + '年' + (m + 1) + '月';
+  var first = new Date(y, m, 1);
+  var daysInMonth = new Date(y, m + 1, 0).getDate();
+  var offset = (first.getDay() + 6) % 7;  // 周一开头
+  var t = todayKey();
+  var html = '';
+  ['一','二','三','四','五','六','日'].forEach(function(w){
+    html += '<div class="c-wd">' + w + '</div>';
+  });
+  for (var i = 0; i < offset; i++) html += '<div class="cal-cell out"></div>';
+  for (var day = 1; day <= daysInMonth; day++){
+    var key = y + '-' + pad2(m + 1) + '-' + pad2(day);
+    var cls = 'cal-cell';
+    if (isPunched(key)) cls += ' punched';
+    if (key === t){
+      cls += ' today';
+      if (justPunched) cls += ' light-up';
+    }
+    html += '<div class="' + cls + '"><span>' + day + '</span><i class="c-dot"></i></div>';
+  }
+  $('calGrid').innerHTML = html;
+}
+function renderPunchRecords(){
+  var box = $('punchRecords');
+  if (!state.punchLog.length){
+    box.innerHTML = '<div class="rec-empty">还没有打卡记录,点上面的按钮开始第一天吧 💪</div>';
+    return;
+  }
+  var log = state.punchLog.slice().sort().reverse().slice(0, 14);
+  var html = '';
+  log.forEach(function(day){
+    html += '<div class="rec-row"><span class="r-dot"></span>' +
+      '<span class="r-date">' + fmtCN(day) + ' 星期' + weekCN(day) + '</span>' +
+      '<span class="r-time">' + (state.punchTimes[day] || '--:--') + '</span></div>';
+  });
+  box.innerHTML = html;
+}
+
+/* ================= 11. 渲染:我的 ================= */
+function renderMine(){
+  $('mineName').textContent = state.user.name;
+  $('mineJoin').textContent = '加入健康干预已 ' + (diffDays(state.user.joinDate, todayKey()) + 1) + ' 天';
+  tween('stPunch', state.punchLog.length, 600, function(v){
+    $('stTotalPunch').textContent = Math.round(v);
+  });
+  tween('stDone', getTotalDone(), 600, function(v){
+    $('stTotalDone').textContent = Math.round(v);
+  });
+  var customN = state.plans.filter(function(p){ return p.custom; }).length;
+  tween('stCustom', customN, 400, function(v){
+    $('stCustom').textContent = Math.round(v);
+  });
+  tween('stMax', getMaxStreak(), 600, function(v){
+    $('stMaxStreak').textContent = Math.round(v);
+  });
+  var unlocked = 0, html = '';
+  BADGE_DEFS.forEach(function(b){
+    var date = state.badges[b.id];
+    if (date) unlocked++;
+    html += '<div class="badge-item' + (date ? '' : ' locked') + '">' +
+      '<div class="b-ico">' + b.icon + '</div>' +
+      '<div class="b-name">' + b.name + '</div>' +
+      '<div class="b-date">' + (date ? fmtCN(date) + ' 解锁' : b.cond) + '</div></div>';
+  });
+  $('badgeCount').textContent = unlocked + '/' + BADGE_DEFS.length;
+  $('badgeWall').innerHTML = html;
+}
+
+/* ================= 12. 渲染调度 ================= */
+function renderDirty(views){
+  views.forEach(function(v){
+    if (v === 'overview') renderOverview();
+    else if (v === 'plans') renderPlans();
+    else if (v === 'checkin') renderCheckin();
+    else if (v === 'mine') renderMine();
+    else if (v === 'detail' && ui.detailOpen) renderDetail();
+  });
+}
+function renderAll(){
+  renderDirty(['overview', 'plans', 'checkin', 'mine', 'detail']);
+}
+<!--__JS3__-->
+</script>
 </body>
 </html>
