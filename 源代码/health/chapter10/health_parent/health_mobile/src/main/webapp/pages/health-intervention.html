@@ -1,101 +1,294 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>健康干预 - 传智健康</title>
-    <link rel="icon" href="../img/asset-favico.ico">
-    <style>
-        :root{
-            --brand:#ff8a00; --brand-2:#ff6a00; --brand-soft:#fff4e6;
-            --ink:#2b2b33; --sub:#9a9aa5; --bg:#f3f2f7; --card:#fff;
-            --radius:16px; --shadow:0 6px 20px rgba(0,0,0,.06);
-        }
-        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-        html,body{background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang SC","Microsoft YaHei",Helvetica,sans-serif;line-height:1.6}
-        ul,li{list-style:none}
-        .app{max-width:750px;margin:0 auto;min-height:100vh;overflow:hidden}
-        .top-header{background:#1d1d22;color:#fff;height:45px;line-height:45px;display:flex;align-items:center;padding:0 14px;position:sticky;top:0;z-index:20}
-        .top-header .back{font-size:22px;cursor:pointer;width:30px}
-        .top-header .title{flex:1;text-align:center;font-size:16px}
-        .top-header .more{width:30px;text-align:right;letter-spacing:2px;font-size:18px}
-        .hero{position:relative;background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 100%);color:#fff;padding:26px 20px 44px;overflow:hidden}
-        .hero .blob{position:absolute;border-radius:50%;background:rgba(255,255,255,.1)}
-        .hero .blob.b1{width:140px;height:140px;top:-46px;right:-24px}
-        .hero .blob.b2{width:80px;height:80px;bottom:-24px;left:-16px;background:rgba(255,255,255,.08)}
-        .hero h1{font-size:23px;font-weight:600;position:relative}
-        .hero p{font-size:13px;opacity:.9;margin-top:4px;position:relative}
-        /* 今日进度卡 */
-        .prog-card{margin:-24px 16px 0;background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:18px;position:relative;z-index:5}
-        .prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-        .prog-top h3{font-size:15px;font-weight:600}
-        .prog-top span{font-size:13px;color:var(--brand);font-weight:600}
-        .bar{height:8px;background:#f0eff4;border-radius:6px;overflow:hidden}
-        .bar i{display:block;height:100%;width:65%;background:linear-gradient(90deg,var(--brand),var(--brand-2));border-radius:6px}
-        .prog-sub{font-size:12px;color:var(--sub);margin-top:8px}
-        /* 干预方案 */
-        .sec-title{padding:22px 18px 12px;font-size:15px;font-weight:600;display:flex;align-items:center}
-        .sec-title::before{content:"";width:4px;height:15px;background:var(--brand);border-radius:2px;margin-right:8px}
-        .plans{padding:0 16px 20px}
-        .plan{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:12px;display:flex;align-items:center;transition:transform .15s;cursor:pointer}
-        .plan:active{transform:scale(.98)}
-        .plan .p-ico{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-        .plan .p-main{flex:1;margin-left:14px}
-        .plan .p-main h4{font-size:15px;font-weight:600}
-        .plan .p-main p{font-size:12px;color:var(--sub);margin-top:2px}
-        .plan .p-tag{font-size:11px;padding:4px 10px;border-radius:12px;background:var(--brand-soft);color:var(--brand-2);font-weight:500;flex-shrink:0}
-        .plan .p-tag.done{background:rgba(33,193,122,.12);color:#21c17a}
-        .fade{opacity:0;transform:translateY(16px);animation:up .5s forwards}
-        @keyframes up{to{opacity:1;transform:none}}
-        .d1{animation-delay:.05s}.d2{animation-delay:.12s}.d3{animation-delay:.19s}.d4{animation-delay:.26s}
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<title>健康干预 - 传智健康</title>
+<link rel="icon" href="../img/asset-favico.ico">
+<style>
+/* ============ 1. Reset + 设计变量 ============ */
+:root{
+  --brand:#ff8a00;
+  --brand2:#ff6a00;
+  --brand-grad:linear-gradient(135deg,#ff8a00,#ff6a00);
+  --brand-soft:#fff4e6;
+  --ink:#2b2b33;
+  --sub:#9a9aa5;
+  --bg:#f3f2f7;
+  --card:#fff;
+  --ok:#21c17a;
+  --danger:#f0463c;
+  --topbar:#1d1d22;
+  --radius:16px;
+  --shadow:0 6px 20px rgba(0,0,0,.06);
+  --ease:cubic-bezier(.22,1,.36,1);
+  --tabbar-h:56px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:-apple-system,"PingFang SC","Microsoft YaHei",Helvetica,Arial,sans-serif;
+  line-height:1.6;font-size:14px;
+  overflow:hidden;
+}
+ul,li{list-style:none}
+button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
+input,textarea{font-family:inherit;font-size:14px;outline:none}
+img{max-width:100%;display:block}
+body.lock{overflow:hidden;touch-action:none}
+
+/* ============ 2. 顶栏 ============ */
+.app{max-width:750px;margin:0 auto;height:100%;position:relative;background:var(--bg)}
+.topbar{
+  background:var(--topbar);color:#fff;height:45px;
+  display:flex;align-items:center;padding:0 12px;
+  position:relative;z-index:30;
+}
+.topbar .tb-side{width:36px;display:flex;align-items:center}
+.topbar .tb-back{padding:6px;margin-left:-6px;display:flex;border-radius:8px}
+.topbar .tb-back:active{background:rgba(255,255,255,.12)}
+.topbar .tb-title{flex:1;text-align:center;font-size:16px;font-weight:500;letter-spacing:.5px}
+
+/* ============ 3. 视图容器 + 转场 ============ */
+.stage{
+  position:absolute;top:45px;bottom:0;left:0;right:0;
+  overflow:hidden;
+  transition:transform .32s var(--ease);
+  will-change:transform;
+}
+.stage.pushed{transform:translateX(-28%)}
+.view{
+  position:absolute;inset:0;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:14px 14px calc(var(--tabbar-h) + 24px);
+  visibility:hidden;
+}
+.view.active{visibility:visible}
+.view.anim-in-right{animation:viewInRight .3s var(--ease) both}
+.view.anim-in-left{animation:viewInLeft .3s var(--ease) both}
+.view.anim-out-left{visibility:visible;animation:viewOutLeft .3s var(--ease) both}
+.view.anim-out-right{visibility:visible;animation:viewOutRight .3s var(--ease) both}
+@keyframes viewInRight{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes viewInLeft{from{transform:translateX(-30px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes viewOutLeft{from{transform:translateX(0);opacity:1}to{transform:translateX(-30px);opacity:0}}
+@keyframes viewOutRight{from{transform:translateX(0);opacity:1}to{transform:translateX(30px);opacity:0}}
+
+/* 压暗遮罩(详情视差) */
+.dim{
+  position:absolute;top:45px;bottom:0;left:0;right:0;
+  background:#000;opacity:0;pointer-events:none;
+  transition:opacity .32s var(--ease);z-index:31;
+}
+.dim.on{opacity:.12}
+
+/* ============ 4. 底部 Tab 栏 ============ */
+.tabbar{
+  position:fixed;bottom:0;left:0;right:0;margin:0 auto;
+  max-width:750px;height:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px));
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  background:#fff;display:flex;z-index:40;
+  box-shadow:0 -2px 14px rgba(0,0,0,.06);
+}
+.tab-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;color:var(--sub);font-size:11px;user-select:none;
+}
+.tab-item svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.tab-item.active{color:var(--brand2);font-weight:600}
+.tab-item.pop svg{animation:tabPop .3s var(--ease)}
+@keyframes tabPop{0%{transform:scale(1)}45%{transform:scale(1.18)}100%{transform:scale(1)}}
+
+/* ============ 5. 通用组件 ============ */
+.card{
+  background:var(--card);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:16px;margin-bottom:14px;
+}
+.card-title{font-size:15px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.card-title .more-link{margin-left:auto;font-size:12px;color:var(--sub);font-weight:400}
+.pressable{transition:transform .12s ease}
+.pressable:active,.pressable.pressing{transform:scale(.97)}
+.hidden{display:none!important}
+
+/* 自绘 checkbox */
+.ck{
+  width:22px;height:22px;border-radius:7px;flex:none;
+  border:2px solid #d9d9e3;display:flex;align-items:center;justify-content:center;
+  transition:background .18s,border-color .18s;
+  background:#fff;
+}
+.ck svg{width:13px;height:13px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.ck svg path{stroke-dasharray:20;stroke-dashoffset:20}
+.ck.on{background:var(--brand-grad);border-color:var(--brand2)}
+.ck.on svg path{animation:drawTick .18s ease-out forwards}
+@keyframes drawTick{to{stroke-dashoffset:0}}
+
+/* 任务行 */
+.task-row{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 4px;border-bottom:1px solid #f4f4f8;
+  cursor:pointer;
+}
+.task-row:last-child{border-bottom:none}
+.task-row .t-text{flex:1;font-size:14px;transition:color .2s;word-break:break-all}
+.task-row.done .t-text{color:var(--sub);text-decoration:line-through}
+.task-row .t-plan{
+  font-size:11px;color:var(--brand2);background:var(--brand-soft);
+  padding:1px 8px;border-radius:99px;flex:none;max-width:110px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+
+/* 进度条 */
+.pbar{height:6px;border-radius:99px;background:#f1f0f5;overflow:hidden}
+.pbar i{
+  display:block;height:100%;border-radius:99px;background:var(--brand-grad);
+  transition:width .5s var(--ease);
+}
+.pbar.green i{background:linear-gradient(135deg,#2bd88b,#21c17a)}
+
+/* ============ 6. 概览视图 ============ */
+.greet{padding:2px 4px 12px;display:flex;align-items:flex-end;justify-content:space-between}
+.greet h2{font-size:21px;font-weight:700;line-height:1.3}
+.greet .g-sub{font-size:12px;color:var(--sub);margin-top:2px}
+.greet .g-avatar{
+  width:42px;height:42px;border-radius:50%;background:var(--brand-soft);
+  display:flex;align-items:center;justify-content:center;font-size:22px;flex:none;
+}
+.ring-card{display:flex;align-items:center;gap:6px}
+.ring-wrap{position:relative;width:160px;height:160px;flex:none;margin:0 auto}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:#f1f0f5;stroke-width:13}
+.ring-fg{
+  fill:none;stroke:url(#ringGrad);stroke-width:13;stroke-linecap:round;
+  transition:stroke .4s;
+}
+.ring-wrap.full .ring-fg{stroke:url(#ringGradOk)}
+.ring-wrap.full{animation:ringPulse .6s var(--ease)}
+@keyframes ringPulse{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
+.ring-center{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;pointer-events:none;
+}
+.ring-num{font-size:34px;font-weight:700;line-height:1.1}
+.ring-num i{font-style:normal;font-size:17px;font-weight:600;margin-left:1px}
+.ring-label{font-size:12px;color:var(--sub);margin-top:2px}
+.ring-side{flex:1;display:flex;flex-direction:column;gap:14px;min-width:0}
+.side-item{display:flex;flex-direction:column;gap:1px}
+.side-item .s-num{font-size:19px;font-weight:700}
+.side-item .s-num em{font-style:normal;font-size:12px;font-weight:400;color:var(--sub);margin-left:2px}
+.side-item .s-label{font-size:12px;color:var(--sub)}
+
+/* 本周热力条 */
+.heat-row{display:flex;gap:7px;margin-top:4px}
+.heat-cell{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;
+}
+.heat-cell .h-block{
+  width:100%;height:34px;border-radius:9px;background:#f1f0f5;
+  transition:background .3s;
+}
+.heat-cell.lv1 .h-block{background:#ffe9d2}
+.heat-cell.lv2 .h-block{background:#ffcf9e}
+.heat-cell.lv3 .h-block{background:#ffab55}
+.heat-cell.lv4 .h-block{background:var(--brand2)}
+.heat-cell.today .h-block{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--brand)}
+.heat-cell .h-day{font-size:11px;color:var(--sub)}
+.heat-cell.today .h-day{color:var(--brand2);font-weight:600}
+.heat-cell.bump .h-block{animation:cellBump .35s var(--ease)}
+@keyframes cellBump{0%{transform:scale(1)}45%{transform:scale(1.14)}100%{transform:scale(1)}}
+
+/* 趋势折线 */
+.trend-box{margin-top:6px}
+.trend-box svg{width:100%;height:70px;display:block;overflow:visible}
+.trend-line{fill:none;stroke:var(--brand);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.trend-area{fill:rgba(255,138,0,.09);stroke:none}
+.trend-dot{fill:var(--brand2);stroke:#fff;stroke-width:2}
+.trend-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--sub);padding:2px 2px 0}
+
+/* 快捷跳转小卡 */
+.quick-row{display:flex;gap:12px}
+.quick-card{
+  flex:1;border-radius:var(--radius);padding:14px;color:#fff;
+  background:var(--brand-grad);box-shadow:var(--shadow);
+  display:flex;align-items:center;gap:10px;cursor:pointer;
+}
+.quick-card.alt{background:linear-gradient(135deg,#2bd88b,#21c17a)}
+.quick-card .q-ico{font-size:24px}
+.quick-card .q-name{font-size:14px;font-weight:600;line-height:1.3}
+.quick-card .q-sub{font-size:11px;opacity:.85}
+
+/* ============ 7. 方案列表视图 ============ */
+.search-box{
+  display:flex;align-items:center;gap:8px;background:#fff;
+  border-radius:12px;padding:9px 12px;box-shadow:var(--shadow);margin-bottom:12px;
+}
+.search-box svg{width:17px;height:17px;stroke:var(--sub);fill:none;stroke-width:2;stroke-linecap:round;flex:none}
+.search-box input{flex:1;border:none;background:none;font-size:14px;color:var(--ink)}
+.search-box input::placeholder{color:#c2c2cc}
+.search-box .s-clear{
+  width:18px;height:18px;border-radius:50%;background:#e4e4ea;color:#fff;
+  font-size:12px;line-height:18px;text-align:center;flex:none;
+}
+.chip-row{
+  position:relative;display:flex;gap:6px;margin-bottom:14px;
+  overflow-x:auto;scrollbar-width:none;padding:3px;
+}
+.chip-row::-webkit-scrollbar{display:none}
+.chip{
+  position:relative;z-index:2;flex:none;padding:6px 16px;border-radius:99px;
+  font-size:13px;color:var(--sub);transition:color .25s;user-select:none;
+}
+.chip.active{color:#fff;font-weight:600}
+.chip-pill{
+  position:absolute;z-index:1;top:3px;height:calc(100% - 6px);left:0;
+  border-radius:99px;background:var(--brand-grad);
+  box-shadow:0 3px 10px rgba(255,106,0,.35);
+  transition:transform .3s var(--ease),width .3s var(--ease);
+}
+.plan-card{
+  background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);
+  margin-bottom:14px;overflow:hidden;cursor:pointer;position:relative;
+}
+.plan-card.fadein{animation:fadeInUp .4s var(--ease) both}
+@keyframes fadeInUp{from{transform:translateY(18px);opacity:0}to{transform:translateY(0);opacity:1}}
+.plan-card.newcard{animation:newGlow 1s ease-in-out 2}
+@keyframes newGlow{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 3px var(--brand),0 6px 20px rgba(255,106,0,.25)}}
+.p-cover{position:relative;height:110px;background:var(--brand-soft);overflow:hidden}
+.p-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2}
+.p-cover .cov-emoji{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:46px;z-index:1;
+}
+.p-corner{
+  position:absolute;top:10px;right:10px;z-index:3;font-size:11px;color:#fff;
+  background:rgba(29,29,34,.6);padding:2px 9px;border-radius:99px;backdrop-filter:blur(2px);
+}
+.p-body{padding:13px 15px 15px}
+.p-head{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.p-name{font-size:16px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.p-cat{font-size:11px;padding:1px 9px;border-radius:99px;flex:none;color:#fff}
+.p-meta{display:flex;gap:14px;font-size:12px;color:var(--sub);margin-bottom:9px}
+.p-meta b{color:var(--ink);font-weight:600}
+.fab{
+  position:fixed;right:calc(50% - min(375px, 50%) + 18px);bottom:calc(var(--tabbar-h) + 22px);
+  width:54px;height:54px;border-radius:50%;background:var(--brand-grad);
+  color:#fff;font-size:28px;line-height:1;z-index:38;
+  box-shadow:0 8px 22px rgba(255,106,0,.4);
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .15s ease;
+}
+.fab:active{transform:scale(.9)}
+.empty-box{text-align:center;padding:44px 20px;color:var(--sub)}
+.empty-box .e-ico{font-size:52px;margin-bottom:10px}
+.empty-box .e-text{font-size:14px;margin-bottom:16px}
+.btn-orange{
+  background:var(--brand-grad);color:#fff;font-size:14px;font-weight:600;
+  padding:9px 26px;border-radius:99px;box-shadow:0 4px 14px rgba(255,106,0,.35);
+}
+<!--__CSS2__-->
+</style>
 </head>
 <body>
-<div class="app">
-    <div class="top-header">
-        <span class="back" onclick="history.go(-1)">‹</span>
-        <span class="title">健康干预</span>
-        <span class="more">···</span>
-    </div>
-
-    <div class="hero">
-        <div class="blob b1"></div><div class="blob b2"></div>
-        <h1>健康干预</h1>
-        <p>专属于您的个性化健康改善方案</p>
-    </div>
-
-    <div class="prog-card fade">
-        <div class="prog-top">
-            <h3>今日干预完成度</h3>
-            <span>65%</span>
-        </div>
-        <div class="bar"><i></i></div>
-        <p class="prog-sub">已完成 2 / 4 项 · 继续保持,健康就在坚持里</p>
-    </div>
-
-    <div class="sec-title fade d1">我的干预方案</div>
-    <div class="plans">
-        <div class="plan fade d1">
-            <div class="p-ico" style="background:rgba(33,193,122,.12)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 21C7 17 4 13.5 4 9.5A4.5 4.5 0 0112 7a4.5 4.5 0 018 2.5c0 4-3 7.5-8 11.5z" stroke="#21c17a" stroke-width="1.5"/><path d="M12 8v5M9.5 10.5h5" stroke="#21c17a" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-            <div class="p-main"><h4>膳食营养干预</h4><p>低盐低脂 · 每日蔬果 500g</p></div>
-            <span class="p-tag done">已完成</span>
-        </div>
-        <div class="plan fade d2">
-            <div class="p-ico" style="background:rgba(18,183,245,.12)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="2.4" stroke="#12b7f5" stroke-width="1.5"/><path d="M7 22l3-6 4 2 1 4M10 16l-1-5 5 1 3 3" stroke="#12b7f5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <div class="p-main"><h4>运动锻炼干预</h4><p>每日快走 30 分钟 · 步数 6000+</p></div>
-            <span class="p-tag done">已完成</span>
-        </div>
-        <div class="plan fade d3">
-            <div class="p-ico" style="background:rgba(155,109,255,.12)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 3a7 7 0 00-4 12.7V19a1 1 0 001 1h6a1 1 0 001-1v-3.3A7 7 0 0012 3z" stroke="#9b6dff" stroke-width="1.5"/><path d="M9 22h6" stroke="#9b6dff" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-            <div class="p-main"><h4>作息睡眠干预</h4><p>23 点前入睡 · 睡足 7 小时</p></div>
-            <span class="p-tag">待完成</span>
-        </div>
-        <div class="plan fade d4">
-            <div class="p-ico" style="background:rgba(255,159,67,.14)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#ff9f43" stroke-width="1.5"/><path d="M8.5 14c.8 1 2 1.6 3.5 1.6s2.7-.6 3.5-1.6M9 9.5h.01M15 9.5h.01" stroke="#ff9f43" stroke-width="1.6" stroke-linecap="round"/></svg></div>
-            <div class="p-main"><h4>心理调节干预</h4><p>正念冥想 10 分钟 · 缓解压力</p></div>
-            <span class="p-tag">待完成</span>
-        </div>
-    </div>
-</div>
+<!--__BODY__-->
 </body>
 </html>
